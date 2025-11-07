@@ -1,4 +1,13 @@
+// src/graphql/resolvers.ts
 import Article from "../models/Article";
+import User from "../models/User";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import dbConnect from "../lib/mongodb";
+import { GraphQLError } from "graphql";
+import { createAccessToken, createRefreshToken, getRefreshCookie, clearRefreshCookie, verifyRefreshToken } from "../lib/auth";
+
+const JWT_SECRET = process.env.JWT_SECRET || "change_this_secret";
 
 export const resolvers = {
   Query: {
@@ -7,12 +16,98 @@ export const resolvers = {
     },
     article: async (_: any, { id }: { id: string }) => {
       return Article.findById(id).lean();
-    }
+    },
+    me: async (_: any, __: any, context: { userId?: string }) => {
+      if (!context || !context.userId) return null;
+      await dbConnect();
+      const user = await User.findById(context.userId).lean();
+      return user;
+    },
   },
   Mutation: {
     createArticle: async (_: any, { title, excerpt, content }: any) => {
       const doc = await Article.create({ title, excerpt, content });
       return doc.toObject();
-    }
-  }
+    },
+
+    signup: async (_: any, { name, email, password }: { name?: string; email: string; password: string }, context: { res?: any }) => {
+      await dbConnect();
+      if (!email || !password) {
+        throw new GraphQLError("Email and password required", { extensions: { code: "BAD_USER_INPUT" } });
+      }
+      const existing = await User.findOne({ email: email.toLowerCase() });
+      if (existing) {
+        throw new GraphQLError("Email already in use", { extensions: { code: "CONFLICT" } });
+      }
+      const salt = await bcrypt.genSalt(10);
+      const hashed = await bcrypt.hash(password, salt);
+      const user = await User.create({ name, email: email.toLowerCase(), password: hashed });
+
+      // generate tokens
+      const accessToken = createAccessToken({ sub: user._id.toString(), email: user.email });
+      const refreshToken = createRefreshToken({ sub: user._id.toString(), email: user.email });
+
+      // set refresh cookie using context.res
+      if (context && context.res) {
+        const cookie = getRefreshCookie(refreshToken);
+        // Append cookie header (apollo may already have set headers so use setHeader)
+        context.res.setHeader("Set-Cookie", cookie);
+      }
+
+      return {
+        token: accessToken,
+        user: {
+          _id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt.toISOString(),
+        },
+      };
+    },
+
+    login: async (_: any, { email, password }: { email: string; password: string }, context: { res?: any }) => {
+      await dbConnect();
+      if (!email || !password) {
+        throw new GraphQLError("Email and password required", { extensions: { code: "BAD_USER_INPUT" } });
+      }
+      const user = await User.findOne({ email: email.toLowerCase() });
+      if (!user) {
+        throw new GraphQLError("Invalid email or password", { extensions: { code: "UNAUTHENTICATED" } });
+      }
+      const valid = await bcrypt.compare(password, user.password);
+      if (!valid) {
+        throw new GraphQLError("Invalid email or password", { extensions: { code: "UNAUTHENTICATED" } });
+      }
+
+      // generate tokens
+      const accessToken = createAccessToken({ sub: user._id.toString(), email: user.email });
+      const refreshToken = createRefreshToken({ sub: user._id.toString(), email: user.email });
+
+      if (context && context.res) {
+        const cookie = getRefreshCookie(refreshToken);
+        context.res.setHeader("Set-Cookie", cookie);
+      }
+
+      return {
+        token: accessToken,
+        user: {
+          _id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt.toISOString(),
+        },
+      };
+    },
+
+    logout: async (_: any, __: any, context: { res?: any }) => {
+      // clear refresh cookie
+      if (context && context.res) {
+        const clear = clearRefreshCookie();
+        context.res.setHeader("Set-Cookie", clear);
+      }
+      return { success: true };
+    },
+
+    // Optional: rotate refresh tokens if you store them server-side (not implemented here)
+  },
 };

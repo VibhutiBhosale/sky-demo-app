@@ -1,17 +1,13 @@
-// src/app/api/graphql.ts
+// src/app/api/graphql/route.ts
 import { ApolloServer } from "@apollo/server";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
 import { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
-import dbConnect from "../../lib/mongodb";
-import { typeDefs } from "../../graphql/schema";
-import { resolvers } from "../../graphql/resolvers";
+import { typeDefs } from "../../../graphql/schema";
+import { resolvers } from "../../../graphql/resolvers";
+import dbConnect from "../../../lib/mongodb";import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "change_this_secret";
 
-/**
- * Extract user ID from Authorization header (if provided)
- */
 function getUserIdFromReq(req: NextRequest) {
   try {
     const auth = req.headers.get("authorization") || "";
@@ -21,38 +17,20 @@ function getUserIdFromReq(req: NextRequest) {
       return decoded?.sub;
     }
   } catch {
-    // ignore invalid tokens
+    return null;
   }
   return null;
 }
 
-/**
- * Create Apollo Server instance
- */
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-});
+const server = new ApolloServer({ typeDefs, resolvers });
 
-/**
- * Correct context function signature for @as-integrations/next
- */
 const handler = startServerAndCreateNextHandler(server, {
   context: async (req: NextRequest) => {
-    try {
-      await dbConnect();
-    } catch (err: any) {
-      console.error("[mongodb] Connection error:", err.message);
-      throw new Error("Database connection failed: " + err.message);
-    }
-
+    await dbConnect();
     const userId = getUserIdFromReq(req);
     return { userId };
   },
 });
 
-/**
- * Export supported HTTP methods for Next.js App Router
- */
 export const POST = handler;
 export const GET = handler;
