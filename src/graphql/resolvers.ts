@@ -67,36 +67,20 @@ export const resolvers = {
 
     login: async (_: any, { email, password }: { email: string; password: string }, context: { res?: any }) => {
       await dbConnect();
-      if (!email || !password) {
-        throw new GraphQLError("Email and password required", { extensions: { code: "BAD_USER_INPUT" } });
-      }
+      if (!email || !password) throw new GraphQLError("Email and password required");
       const user = await User.findOne({ email: email.toLowerCase() });
-      if (!user) {
-        throw new GraphQLError("Invalid email or password", { extensions: { code: "UNAUTHENTICATED" } });
-      }
+      if (!user) throw new GraphQLError("Invalid email or password");
       const valid = await bcrypt.compare(password, user.password);
-      if (!valid) {
-        throw new GraphQLError("Invalid email or password", { extensions: { code: "UNAUTHENTICATED" } });
-      }
+      if (!valid) throw new GraphQLError("Invalid email or password");
 
-      // generate tokens
       const accessToken = createAccessToken({ sub: user._id.toString(), email: user.email });
       const refreshToken = createRefreshToken({ sub: user._id.toString(), email: user.email });
-
       if (context && context.res) {
         const cookie = getRefreshCookie(refreshToken);
         context.res.setHeader("Set-Cookie", cookie);
       }
 
-      return {
-        token: accessToken,
-        user: {
-          _id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          createdAt: user.createdAt.toISOString(),
-        },
-      };
+      return { token: accessToken, user: { _id: user._id, name: user.name, email: user.email } };
     },
 
     logout: async (_: any, __: any, context: { res?: any }) => {

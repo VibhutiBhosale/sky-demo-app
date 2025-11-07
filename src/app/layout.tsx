@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Image from "next/image";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,6 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <header className="masthead" role="banner">
+          <Image className="masthead-logo" src="https://id.sky.com/static-assets/sky-logo-small.png" alt="Sky logo" width={41} height={25} />
+        </header>
         {children}
       </body>
     </html>
