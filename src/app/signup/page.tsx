@@ -51,7 +51,7 @@ export default function SignupPage() {
       } else {
         const token = json.data.signup.token;
         setAccessToken(token);
-        router.push("/");
+        router.push("/login");
       }
     } catch (err: any) {
       setServerError(err.message || "Signup failed");
