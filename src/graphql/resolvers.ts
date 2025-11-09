@@ -1,5 +1,4 @@
 // src/graphql/resolvers.ts
-import Article from "../models/Article";
 import User from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -11,54 +10,71 @@ const JWT_SECRET = process.env.JWT_SECRET || "change_this_secret";
 
 export const resolvers = {
   Query: {
-    articles: async () => {
-      return Article.find({}).sort({ createdAt: -1 }).lean();
-    },
-    article: async (_: any, { id }: { id: string }) => {
-      return Article.findById(id).lean();
-    },
-    me: async (_: any, __: any, context: { userId?: string }) => {
-      if (!context || !context.userId) return null;
-      await dbConnect();
-      const user = await User.findById(context.userId).lean();
-      return user;
+    me: async (_parent: any, _args: any, context: { userId?: string }) => {
+      if (!context.userId) return null;
+      return await User.findById(context.userId);
     },
   },
   Mutation: {
-    signup: async (_: any, { name, email, password }: { name?: string; email: string; password: string }, context: { res?: any }) => {
-      await dbConnect();
-      if (!email || !password) {
-        throw new GraphQLError("Email and password required", { extensions: { code: "BAD_USER_INPUT" } });
-      }
-      const existing = await User.findOne({ email: email.toLowerCase() });
-      if (existing) {
-        throw new GraphQLError("Email already in use", { extensions: { code: "CONFLICT" } });
-      }
-      const salt = await bcrypt.genSalt(10);
-      const hashed = await bcrypt.hash(password, salt);
-      const user = await User.create({ name, email: email.toLowerCase(), password: hashed });
+    signup: async (
+  _: any,
+  { name, email, password }: { name?: string; email: string; password: string },
+  context: { res?: any }
+) => {
+  await dbConnect();
 
-      // generate tokens
-      const accessToken = createAccessToken({ sub: user._id.toString(), email: user.email });
-      const refreshToken = createRefreshToken({ sub: user._id.toString(), email: user.email });
+  if (!email || !password) {
+    throw new GraphQLError("Email and password required", {
+      extensions: { code: "BAD_USER_INPUT" },
+    });
+  }
 
-      // set refresh cookie using context.res
-      if (context && context.res) {
-        const cookie = getRefreshCookie(refreshToken);
-        // Append cookie header (apollo may already have set headers so use setHeader)
-        context.res.setHeader("Set-Cookie", cookie);
-      }
+  if (!name || !/^[A-Za-z]+ [A-Za-z]+$/.test(name.trim())) {
+    throw new GraphQLError("Full name must be in 'Firstname Lastname' format", {
+      extensions: { code: "BAD_USER_INPUT" },
+    });
+  }
 
-      return {
-        token: accessToken,
-        user: {
-          _id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          createdAt: user.createdAt.toISOString(),
-        },
-      };
+  const existing = await User.findOne({ email: email.toLowerCase() });
+  if (existing) {
+    throw new GraphQLError("Email already in use", {
+      extensions: { code: "CONFLICT" },
+    });
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashed = await bcrypt.hash(password, salt);
+
+  const user = await User.create({
+    name: name.trim(),
+    email: email.toLowerCase(),
+    password: hashed,
+  });
+
+  const accessToken = createAccessToken({
+    sub: user._id.toString(),
+    email: user.email,
+  });
+  const refreshToken = createRefreshToken({
+    sub: user._id.toString(),
+    email: user.email,
+  });
+
+  if (context && context.res) {
+    const cookie = getRefreshCookie(refreshToken);
+    context.res.setHeader("Set-Cookie", cookie);
+  }
+
+  return {
+    token: accessToken,
+    user: {
+      _id: user._id.toString(),
+      name: user.name,
+      email: user.email,
     },
+  };
+},
+
 
     login: async (_: any, { email, password }: { email: string; password: string }, context: { res?: any }) => {
       await dbConnect();
