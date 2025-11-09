@@ -1,15 +1,21 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose from "mongoose";
 
-export interface IUser extends Document {
-  username: string;
-  email: string;
-  password: string; // this is the field you’re using
-}
-
-const UserSchema: Schema = new Schema<IUser>({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // stores bcrypt hash
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    validate: {
+      validator: (v: string) => /^[A-Za-z]+ [A-Za-z]+$/.test(v.trim()),
+      message: "Full name must include first and last name (e.g., 'John Doe').",
+    },
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    match: [/^\S+@\S+\.\S+$/, "Please use a valid email address."],
+  },
+  password: { type: String, required: true },
 });
 
-export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+export default mongoose.models.User || mongoose.model("User", userSchema);
