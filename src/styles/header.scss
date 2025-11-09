@@ -1,0 +1,42 @@
+.masthead {
+                border-bottom: 1px solid #ddd;
+                display: flex;
+                justify-content: center;
+                padding: 12px 4px 10px;
+            }
+
+            .masthead::before {
+                background: linear-gradient(to right, #ff9e00 0%, #f00 35%, #b5007d 60%, #21429c 85%, #0071ff 100%);
+                content: "";
+                top: 0;
+                left: 0;
+                display: block;
+                position: absolute;
+                width: 100%;
+                height: 3px;
+            }
+
+            .masthead-logo {
+                display: block;
+                height: 25px;
+                margin: 1px;
+                width: 41px;
+            }
+
+            .noscript {
+                padding: 12px 24px;
+                text-align: center;
+            }
+
+            .noscript h1 {
+                background-image: linear-gradient( 90deg, #f56400 9.9%, #ff0000 35%, #b5007d 60%, #21429c 85%, #0071ff 100% );
+                font-weight: normal;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            @media (min-width: 700px) {
+                .noscript {
+                    padding: 48px;
+                }
+            }

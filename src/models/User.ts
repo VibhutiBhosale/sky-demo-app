@@ -1,23 +1,15 @@
-// src/models/User.ts
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IUser extends Document {
-  name: string;
+  username: string;
   email: string;
-  password: string; // hashed
-  createdAt: Date;
-  updatedAt: Date;
+  password: string; // this is the field you’re using
 }
 
-const UserSchema = new Schema<IUser>(
-  {
-    name: { type: String, required: false },
-    email: { type: String, required: true, unique: true, index: true },
-    password: { type: String, required: true },
-  },
-  { timestamps: true }
-);
+const UserSchema: Schema = new Schema<IUser>({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true }, // stores bcrypt hash
+});
 
-// Avoid model overwrite issue in dev
-const User: Model<IUser> = (mongoose.models.User as Model<IUser>) || mongoose.model<IUser>("User", UserSchema);
-export default User;
+export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
