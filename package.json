@@ -12,7 +12,6 @@
   "dependencies": {
     "@apollo/server": "^5.0.0",
     "@as-integrations/next": "^4.1.0",
-    "@yaacovcr/transform": "^0.0.8",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "cookie": "^1.0.2",
@@ -46,6 +45,7 @@
     "lint-staged": "^16.2.6",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
+    "sass": "^1.93.3",
     "tailwindcss": "^4.1.17",
     "ts-jest": "^29.4.5",
     "typescript": "^5"

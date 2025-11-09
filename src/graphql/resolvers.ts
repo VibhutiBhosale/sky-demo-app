@@ -25,11 +25,6 @@ export const resolvers = {
     },
   },
   Mutation: {
-    createArticle: async (_: any, { title, excerpt, content }: any) => {
-      const doc = await Article.create({ title, excerpt, content });
-      return doc.toObject();
-    },
-
     signup: async (_: any, { name, email, password }: { name?: string; email: string; password: string }, context: { res?: any }) => {
       await dbConnect();
       if (!email || !password) {
@@ -91,6 +86,42 @@ export const resolvers = {
       }
       return { success: true };
     },
+
+    verifyPassword: async (_: any, { identifier, password }: any) => {
+      try {
+        // 1️⃣ Find user by email or username
+        const user = await User.findOne({
+          $or: [
+            { email: identifier.toLowerCase() },
+            { username: identifier },
+          ],
+        });
+
+        if (!user) {
+          return { success: false, message: 'Account not found.' };
+        }
+
+        // 2️⃣ Compare provided password with stored hashed password
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) {
+          return { success: false, message: 'Incorrect password.' };
+        }
+
+        // 3️⃣ Generate JWT token
+        const token = jwt.sign(
+          { userId: user._id, email: user.email },
+          process.env.JWT_SECRET || 'supersecret',
+          { expiresIn: '1h' }
+        );
+
+        // 4️⃣ Return success response
+        return { success: true, message: 'Login successful', token };
+      } catch (err) {
+        console.error('verifyPassword error:', err);
+        return { success: false, message: 'Server error' };
+      }
+    },
+
 
     // Optional: rotate refresh tokens if you store them server-side (not implemented here)
   },

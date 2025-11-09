@@ -1,10 +1,117 @@
-    @tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Sky Text';
+  font-weight: normal;
+  font-display: swap;
+  src: url('https://static.skyassets.com/fonts/sky-regular.woff2') format('woff');
+}
 
-html, body, #__next {
-  height: 100%;
-  background-color: #f8fafc;
-  color: #0f172a;
+@font-face {
+  font-family: 'Sky Text';
+  font-weight: bold;
+  font-display: swap;
+  src: url('https://static.skyassets.com/fonts/sky-medium.woff2') format('woff');
+}
+@font-face {
+  font-family: 'Sky Text';
+  font-display: fallback;
+  src:
+    url('//static.skyassets.com/fonts/sky-regular.woff2') format('woff2'),
+    url('//static.skyassets.com/fonts/sky-regular.woff') format('woff');
+}
+:root {
+  box-sizing: border-box;
+  --baseFont: 'Sky Text';
+  --baseSpacing: 18px;
+  --baseFontSize: 16px;
+  --baseFontColor: #4a4a4a;
+  --baseAccentColor: #000ff5;
+  --baseDisabledColor: #909090;
+  --baseAccentColorDarker: #020c9f;
+  --baseBorderRadius: 4px;
+  --baseInvalidColor: #dd1718;
+  --baseValidColor: #127e14;
+  --color-dark: #4a4a4a;
+  --color-light: #909090;
+  --color-white: #ffffff;
+  --color-grey2: #fafafa;
+  --color-grey5: #f2f2f2;
+  --color-grey10: #e6e6e6;
+  --color-grey20: #cccccc;
+  --color-grey40: #999999;
+  --color-grey50: #909090;
+  --color-grey70: #4d4d4d;
+  --color-grey80: #333333;
+  --color-black: #000000;
+  --color-primary: #000ff5;
+  --color-primary-regular: #000ff5;
+  --color-primary-light: #0097f5;
+  --color-primary-dark: #000cc4;
+  --color-positive-regular: #007e13;
+  --color-positive-dark: #00650f;
+  --color-negative-regular: #dd1717;
+  --color-negative-dark: #b11212;
+  --radius-0: 0px;
+  --radius-1: 4px;
+  --radius-2: 8px;
+  --radius-3: 12px;
+  --radius-4: 16px;
+  --spacing-0: 0px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 24px;
+  --spacing-6: 32px;
+  --spacing-7: 48px;
+  --spacing-8: 72px;
+  --spacing-9: 96px;
+  --space-xs: 2px;
+  --space-sm: 4px;
+  --space-md: 8px;
+  --space-lg: 16px;
+  --space-xl: 32px;
+  --box-shadow-medium: rgba(0, 0, 0, 0.25) 0px 2px 8px 0px;
+  --box-shadow-small: rgba(0, 0, 0, 0.15) 0px 2px 4px 0px;
+  --color-background: var(--color-grey2);
+}
+html,
+body,
+#__next {
+  font-family:
+    Sky Text,
+    sans-serif;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+main {
+  flex: 1;
+}
+
+.antialiased {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+p {
+  margin: 0;
+}
+
+@media (min-width: 480px) {
+  body {
+    background-color: var(--color-background);
+  }
 }
