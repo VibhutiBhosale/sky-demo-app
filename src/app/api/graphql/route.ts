@@ -41,12 +41,12 @@ const handler = startServerAndCreateNextHandler<NextRequest>(server, {
 });
 
 // Properly typed GET and POST handlers
-export async function GET(request: Request): Promise<Response> {
+/*export async function GET(request: Request): Promise<Response> {
   if (process.env.NODE_ENV === "production") {
     return new Response("GET not allowed", { status: 405 });
   }
   return handler(request);
-}
+}*/
 
 export async function POST(request: Request): Promise<Response> {
   return handler(request);
