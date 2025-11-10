@@ -7,7 +7,9 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "sonar": "sonar-scanner",
+    "lint:sonar": "sonar-scanner"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
@@ -51,6 +53,7 @@
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "sass": "^1.93.3",
+    "sonar-scanner": "^3.1.0",
     "tailwindcss": "^4.1.17",
     "ts-jest": "^29.4.5",
     "typescript": "^5"

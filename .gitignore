@@ -20,6 +20,9 @@
 # production
 /build
 
+# SonarQube
+/.scannerwork/
+
 # misc
 .DS_Store
 *.pem
