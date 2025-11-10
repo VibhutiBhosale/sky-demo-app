@@ -1,26 +1,26 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import ErrorIcon from '../../components/icons/ErrorIcon';
-import NextIcon from '../../components/icons/NextIcon';
-import PasswordToggleOnIcon from '../../components/icons/PasswordToggleOnIcon';
-import PasswordToggleOffIcon from '../../components/icons/PasswordToggleOffIcon';
+"use client";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import ErrorIcon from "../../components/icons/ErrorIcon";
+import NextIcon from "../../components/icons/NextIcon";
+import PasswordToggleOnIcon from "../../components/icons/PasswordToggleOnIcon";
+import PasswordToggleOffIcon from "../../components/icons/PasswordToggleOffIcon";
 
 export default function EnterPassword() {
   const router = useRouter();
 
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [identifier, setIdentifier] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedIdentifier = sessionStorage.getItem('login_identifier');
+    const storedIdentifier = sessionStorage.getItem("login_identifier");
     if (!storedIdentifier) {
       // If no identifier found, redirect back to login
-      router.push('/login');
+      router.push("/login");
     } else {
       setIdentifier(storedIdentifier);
     }
@@ -30,7 +30,7 @@ export default function EnterPassword() {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!password.trim()) {
-      newErrors.password = 'Enter your password.';
+      newErrors.password = "Enter your password.";
     }
     return newErrors;
   };
@@ -58,9 +58,9 @@ export default function EnterPassword() {
         }
       `;
 
-      const res = await fetch('/api/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query,
           variables: { identifier, password },
@@ -70,24 +70,28 @@ export default function EnterPassword() {
       const { data, errors: gqlErrors } = await res.json();
 
       if (gqlErrors || !data?.verifyPassword) {
-        throw new Error(gqlErrors?.[0]?.message || 'Unexpected error');
+        throw new Error(gqlErrors?.[0]?.message || "Unexpected error");
       }
 
       const { success, message, token } = data.verifyPassword;
 
       if (success) {
-        sessionStorage.removeItem('login_identifier');
+        sessionStorage.removeItem("login_identifier");
         // ✅ Store token if provided (optional)
-        if (token) localStorage.setItem('access_token', token);
+        if (token) localStorage.setItem("access_token", token);
 
         // ✅ Redirect to home or dashboard
-        router.push('/');
+        router.push("/");
       } else {
-        setErrors({ password: message || 'Incorrect password.' });
+        setErrors({ password: message || "Incorrect password." });
       }
-    } catch (err: any) {
-      console.error(err);
-      setErrors({ password: 'Incorrect password. Please try again.' });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error("Unknown error:", err);
+      }
+      setErrors({ password: "Incorrect password. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -133,19 +137,19 @@ export default function EnterPassword() {
                   <div className="input-wrapper">
                     <input
                       autoComplete="current-password"
-                      className={`input touched ${errors.password ? 'input-error' : ''}`}
+                      className={`input touched ${errors.password ? "input-error" : ""}`}
                       data-testid="PASSWORD_INPUT"
                       id="password"
                       maxLength={256}
                       name="password"
                       required
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => {
-                      setPassword(e.target.value);
-                      if (errors.password) setErrors({});
-                    }}
-                    disabled={loading}
+                      onChange={e => {
+                        setPassword(e.target.value);
+                        if (errors.password) setErrors({});
+                      }}
+                      disabled={loading}
                     />
                     <span className="pseudo-focus"></span>
                     <p aria-hidden="true" className="displayed-input-label">
@@ -156,7 +160,7 @@ export default function EnterPassword() {
                       data-tracking-description="cta:toggle-password-visibility"
                       data-tracking-location="Page"
                       type="button"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       data-tracking-text="Hide password in text field"
                       data-testid="PASSWORD_INPUT_TOGGLE"
                       id="passwordToggle"
@@ -166,16 +170,16 @@ export default function EnterPassword() {
                     </button>
                   </div>
                   {errors.password && (
-                  <div className="error-message-container">
-                    <ErrorIcon />
-                    <p
-                      id="identifierAriaErrorText"
-                      data-testid="IDENTIFIER_INPUT_ERROR"
-                      className="body-sm text ta-left error-message negative-regular"
-                    >
-                      {errors.password}
-                    </p>
-                  </div>
+                    <div className="error-message-container">
+                      <ErrorIcon />
+                      <p
+                        id="identifierAriaErrorText"
+                        data-testid="IDENTIFIER_INPUT_ERROR"
+                        className="body-sm text ta-left error-message negative-regular"
+                      >
+                        {errors.password}
+                      </p>
+                    </div>
                   )}
                 </div>
                 <div className="identifier-links-and-button-grid">
@@ -202,7 +206,7 @@ export default function EnterPassword() {
                     data-tracking-text="Continue"
                     disabled={loading}
                   >
-                    {loading ? 'Verifying...' : 'Continue'}
+                    {loading ? "Verifying..." : "Continue"}
                   </button>
                 </div>
               </form>
