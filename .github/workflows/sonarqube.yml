@@ -48,11 +48,11 @@ jobs:
       # 🔎 Step 7: SonarCloud Scan
       - name: Run SonarCloud Scan
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          npx sonar-scanner \
-            -Dsonar.organization=vibhutibhosale \                # 🟢 Replace with your SonarCloud org key
-            -Dsonar.projectKey=VibhutiBhosale_sky-demo-app \     # 🟢 Replace with your exact project key
+            npx sonar-scanner \
+            -Dsonar.organization=vibhutibhosale \
+            -Dsonar.projectKey=VibhutiBhosale_sky-demo-app \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.sources=src \
@@ -60,6 +60,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.typescript.tsconfigPath=tsconfig.json \
             -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/build/**,**/coverage/**,**/dist/**
+
 
       # 🧹 Step 8 (Optional): Cache cleanup
       - name: Clean up npm cache
