@@ -8,14 +8,17 @@ import { resolvers } from "../../../graphql/resolvers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "change_this_secret";
 
+// Initialize Apollo Server
 const server = new ApolloServer({
   typeDefs,
   resolvers,
 });
 
-const handler = startServerAndCreateNextHandler(server, {
-  context: async (req: NextRequest): Promise<{ userId?: string }> => {
+// Create Apollo handler for the App Router (NextRequest)
+const handler = startServerAndCreateNextHandler<NextRequest>(server, {
+  context: async (req): Promise<{ userId?: string }> => {
     await dbConnect();
+
     const auth = req.headers.get("authorization");
     let userId: string | undefined;
 
@@ -24,8 +27,12 @@ const handler = startServerAndCreateNextHandler(server, {
         const token = auth.split(" ")[1];
         const decoded = jwt.verify(token, JWT_SECRET) as { sub: string };
         userId = decoded.sub;
-      } catch (err) {
-        console.error("JWT verification failed:", err);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error("JWT verification failed:", err.message);
+        } else {
+          console.error("JWT verification failed: unknown error", err);
+        }
       }
     }
 
@@ -33,4 +40,11 @@ const handler = startServerAndCreateNextHandler(server, {
   },
 });
 
-export { handler as GET, handler as POST };
+// Properly typed GET and POST handlers
+export async function GET(request: Request): Promise<Response> {
+  return handler(request);
+}
+
+export async function POST(request: Request): Promise<Response> {
+  return handler(request);
+}
