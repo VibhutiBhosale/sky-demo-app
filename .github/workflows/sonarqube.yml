@@ -70,7 +70,7 @@ jobs:
             -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/build/**,**/coverage/**
 
       # ---------------------------------
-      # 8️⃣ Upload coverage as artifact (optional)
+      # 8️⃣ Upload coverage as artifact (optional)*
       # ---------------------------------
       - name: Upload coverage report
         if: success()
