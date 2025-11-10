@@ -1,0 +1,67 @@
+name: 📊 SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarqube:
+    name: 🔍 Build, Test & Analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      # 🧱 Step 1: Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required by SonarCloud for full analysis history
+
+      # ⚙️ Step 2: Setup Node.js (use same version as your local env)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      # 📦 Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # ✅ Step 4: Run lint check (non-blocking)
+      - name: Run ESLint
+        run: npm run lint || echo "⚠️ Lint warnings ignored"
+
+      # 🧪 Step 5: Run tests with coverage (non-blocking)
+      - name: Run tests
+        run: npm test -- --coverage || echo "⚠️ Tests failed but continuing for Sonar analysis"
+
+      # 🏗️ Step 6: Build Next.js project
+      - name: Build Next.js project
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        run: npm run build
+
+      # 🔎 Step 7: SonarCloud Scan
+      - name: Run SonarCloud Scan
+        env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+            npx sonar-scanner \
+            -Dsonar.organization=vibhutibhosale \
+            -Dsonar.projectKey=VibhutiBhosale_sky-demo-app \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.sources=src \
+            -Dsonar.language=ts \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.typescript.tsconfigPath=tsconfig.json \
+            -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/build/**,**/coverage/**,**/dist/**
+
+
+      # 🧹 Step 8 (Optional): Cache cleanup
+      - name: Clean up npm cache
+        run: npm cache clean --force
