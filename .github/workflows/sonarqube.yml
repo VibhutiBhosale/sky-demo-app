@@ -1,40 +1,62 @@
-name: 🔍 SonarQube Analysis
+name: 📊 SonarQube Analysis
 
 on:
   push:
     branches:
       - main
-      - master
   pull_request:
     branches:
       - main
-      - master
 
 jobs:
   sonarqube:
-    name: SonarQube Scan
+    name: 🔍 Build, Test & SonarQube Scan
     runs-on: ubuntu-latest
 
     steps:
+      # ---------------------------------
+      # 1️⃣ Checkout repository
+      # ---------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ---------------------------------
+      # 2️⃣ Set up Node.js (for Next.js)
+      # ---------------------------------
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
+      # ---------------------------------
+      # 3️⃣ Install dependencies
+      # ---------------------------------
       - name: Install dependencies
         run: npm ci
 
-      - name: Build project
-        run: npm run build --if-present
+      # ---------------------------------
+      # 4️⃣ Run ESLint
+      # ---------------------------------
+      - name: Run ESLint
+        run: npm run lint || echo "Lint warnings ignored"
 
-      - name: Run tests and generate coverage
-        run: |
-          npm run test -- --coverage || echo "Tests failed but continuing for Sonar analysis"
+      # ---------------------------------
+      # 5️⃣ Run Jest tests with coverage
+      # ---------------------------------
+      - name: Run tests
+        run: npm test -- --coverage || echo "Tests failed but continuing for Sonar analysis"
 
-      - name: Run SonarQube Scanner
+      # ---------------------------------
+      # 6️⃣ Build the Next.js project
+      # ---------------------------------
+      - name: Build Next.js project
+        run: npm run build
+
+      # ---------------------------------
+      # 7️⃣ Run SonarQube Scanner
+      # ---------------------------------
+      - name: Run SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -44,4 +66,15 @@ jobs:
             -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-            -Dsonar.typescript.tsconfigPath=tsconfig.json
+            -Dsonar.typescript.tsconfigPath=tsconfig.json \
+            -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/build/**,**/coverage/**
+
+      # ---------------------------------
+      # 8️⃣ Upload coverage as artifact (optional)
+      # ---------------------------------
+      - name: Upload coverage report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
