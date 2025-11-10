@@ -1,4 +1,4 @@
-name: 📊 SonarQube Analysis
+name: 📊 SonarQube / SonarCloud Analysis
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   sonarqube:
-    name: 🔍 Build, Test & SonarQube Scan
+    name: 🔍 Build, Test & Sonar Analysis
     runs-on: ubuntu-latest
 
     steps:
@@ -37,14 +37,14 @@ jobs:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: npm run build
 
-      - name: Run SonarQube Scan
+      - name: Run SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           npx sonar-scanner \
+            -Dsonar.organization=vibhutibhosale \
             -Dsonar.projectKey=sky-demo-app \
-            -Dsonar.sources=src \
-            -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.typescript.tsconfigPath=tsconfig.json \
