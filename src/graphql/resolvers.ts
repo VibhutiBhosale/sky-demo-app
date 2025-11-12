@@ -1,14 +1,14 @@
-import User from "../models/User";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import dbConnect from "../lib/mongodb";
-import { GraphQLError } from "graphql";
+import User from '../models/User';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import dbConnect from '../lib/mongodb';
+import { GraphQLError } from 'graphql';
 import {
   createAccessToken,
   createRefreshToken,
   getRefreshCookie,
   clearRefreshCookie,
-} from "../lib/auth";
+} from '../lib/auth';
 
 // ✅ Define shared context and argument types
 interface GraphQLContext {
@@ -43,11 +43,7 @@ interface JwtPayload {
 export const resolvers = {
   Query: {
     // ✅ Type-safe me resolver
-    me: async (
-      _parent: unknown,
-      _args: Record<string, never>,
-      context: GraphQLContext
-    ) => {
+    me: async (_parent: unknown, _args: Record<string, never>, context: GraphQLContext) => {
       if (!context.userId) return null;
       return await User.findById(context.userId);
     },
@@ -58,26 +54,26 @@ export const resolvers = {
     signup: async (
       _parent: unknown,
       { name, email, password }: SignupArgs,
-      context: GraphQLContext
+      context: GraphQLContext,
     ) => {
       await dbConnect();
 
       if (!email || !password) {
-        throw new GraphQLError("Email and password required", {
-          extensions: { code: "BAD_USER_INPUT" },
+        throw new GraphQLError('Email and password required', {
+          extensions: { code: 'BAD_USER_INPUT' },
         });
       }
 
       if (!name || !/^[A-Za-z]+ [A-Za-z]+$/.test(name.trim())) {
         throw new GraphQLError("Full name must be in 'Firstname Lastname' format", {
-          extensions: { code: "BAD_USER_INPUT" },
+          extensions: { code: 'BAD_USER_INPUT' },
         });
       }
 
       const existing = await User.findOne({ email: email.toLowerCase() });
       if (existing) {
-        throw new GraphQLError("Email already in use", {
-          extensions: { code: "CONFLICT" },
+        throw new GraphQLError('Email already in use', {
+          extensions: { code: 'CONFLICT' },
         });
       }
 
@@ -101,7 +97,7 @@ export const resolvers = {
 
       if (context.res) {
         const cookie = getRefreshCookie(refreshToken);
-        context.res.setHeader("Set-Cookie", cookie);
+        context.res.setHeader('Set-Cookie', cookie);
       }
 
       return {
@@ -115,25 +111,21 @@ export const resolvers = {
     },
 
     // ✅ Login resolver
-    login: async (
-      _parent: unknown,
-      { email, password }: LoginArgs,
-      context: GraphQLContext
-    ) => {
+    login: async (_parent: unknown, { email, password }: LoginArgs, context: GraphQLContext) => {
       await dbConnect();
 
       if (!email || !password) {
-        throw new GraphQLError("Email and password required");
+        throw new GraphQLError('Email and password required');
       }
 
       const user = await User.findOne({ email: email.toLowerCase() });
       if (!user) {
-        throw new GraphQLError("Invalid email or password");
+        throw new GraphQLError('Invalid email or password');
       }
 
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) {
-        throw new GraphQLError("Invalid email or password");
+        throw new GraphQLError('Invalid email or password');
       }
 
       const accessToken = createAccessToken({
@@ -147,7 +139,7 @@ export const resolvers = {
 
       if (context.res) {
         const cookie = getRefreshCookie(refreshToken);
-        context.res.setHeader("Set-Cookie", cookie);
+        context.res.setHeader('Set-Cookie', cookie);
       }
 
       return {
@@ -161,14 +153,10 @@ export const resolvers = {
     },
 
     // ✅ Logout resolver
-    logout: async (
-      _parent: unknown,
-      _args: Record<string, never>,
-      context: GraphQLContext
-    ) => {
+    logout: async (_parent: unknown, _args: Record<string, never>, context: GraphQLContext) => {
       if (context.res) {
         const clear = clearRefreshCookie();
-        context.res.setHeader("Set-Cookie", clear);
+        context.res.setHeader('Set-Cookie', clear);
       }
       return { success: true };
     },
@@ -176,39 +164,44 @@ export const resolvers = {
     // ✅ VerifyPassword resolver (fully typed)
     verifyPassword: async (
       _parent: unknown,
-      { identifier, password }: VerifyPasswordArgs
+      { identifier, password }: VerifyPasswordArgs,
     ): Promise<{ success: boolean; message: string; token?: string }> => {
       try {
         const user = await User.findOne({
-          $or: [
-            { email: identifier.toLowerCase() },
-            { username: identifier },
-          ],
+          $or: [{ email: identifier.toLowerCase() }, { username: identifier }],
         });
 
         if (!user) {
-          return { success: false, message: "Account not found." };
+          return {
+            success: false,
+            message:
+              'The password you entered is incorrect. Please try again or use the forgotten your password link below.',
+          };
         }
 
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-          return { success: false, message: "Incorrect password." };
+          return {
+            success: false,
+            message:
+              'The password you entered is incorrect. Please try again or use the forgotten your password link below.',
+          };
         }
 
         const token = jwt.sign(
           { userId: user._id, email: user.email } as JwtPayload,
-          process.env.JWT_SECRET || "supersecret",
-          { expiresIn: "1h" }
+          process.env.JWT_SECRET || 'supersecret',
+          { expiresIn: '1h' },
         );
 
-        return { success: true, message: "Login successful", token };
+        return { success: true, message: 'Login successful', token };
       } catch (err: unknown) {
         if (err instanceof Error) {
-          console.error("verifyPassword error:", err.message);
+          console.error('verifyPassword error:', err.message);
         } else {
-          console.error("verifyPassword error:", err);
+          console.error('verifyPassword error:', err);
         }
-        return { success: false, message: "Server error" };
+        return { success: false, message: 'Server error' };
       }
     },
   },

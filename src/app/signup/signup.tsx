@@ -1,140 +1,110 @@
-// src/app/signup/page.tsx
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { setAccessToken } from "../../lib/clientAuth";
 import Link from "next/link";
-import PasswordToggleOnIcon from "../../components/icons/PasswordToggleOnIcon";
-import PasswordToggleOffIcon from "../../components/icons/PasswordToggleOffIcon";
-import ErrorIcon from "../../components/icons/ErrorIcon";
-
-const SIGNUP_MUTATION = `
-mutation Signup($name: String, $email: String!, $password: String!) {
-  signup(name: $name, email: $email, password: $password) {
-    token
-    user { _id name email }
-  }
-}
-`;
+import PasswordToggleOnIcon from "@/components/icons/PasswordToggleOnIcon";
+import PasswordToggleOffIcon from "@/components/icons/PasswordToggleOffIcon";
+import ErrorIcon from "@/components/icons/ErrorIcon";
+import { useFormSubmit } from "@/hooks/useFormSubmit";
+import { useSignupForm } from "@/hooks/useSignupForm";
+import { SIGNUP_MUTATION } from "@/graphql/mutations/auth";
+import { graphqlRequest } from "@/lib/apiClient";
+import { errorMessages, labels, route } from "@/constants";
 
 export default function Signup() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPasswordHints, setShowPasswordHints] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [passwordErrors, setPasswordErrors] = useState<string[] | null>(null);
-  const [touchedPassword, setTouchedPassword] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [touchedEmail, setTouchedEmail] = useState(false);
-  const [fullNameError, setFullNameError] = useState<string | null>(null);
-  const [touchedFullName, setTouchedFullName] = useState(false);
   const [marketingOptIn, setMarketingOptIn] = useState(false);
+  const form = useSignupForm();
+  const {
+    name,
+    email,
+    password,
+    fullNameError,
+    emailError,
+    passwordErrors,
+    touchedFullName,
+    touchedEmail,
+    touchedPassword,
+    validateAll,
+    handleNameChange,
+    handleEmailChange,
+    handlePasswordChange,
+  } = form;
 
-  async function onSubmit(ev: React.FormEvent) {
-    ev.preventDefault();
-    setServerError(null);
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          query: SIGNUP_MUTATION,
-          variables: { name, email, password },
-        }),
+  const { handleSubmit, loading, setErrors } = useFormSubmit({
+    validate: (): Record<string, string> => {
+      const isValid = validateAll();
+      return isValid ? {} : { general: errorMessages.signup.generalFallback };
+    },
+    request: async ({
+      name,
+      email,
+      password,
+    }: {
+      name: string;
+      email: string;
+      password: string;
+    }) => {
+      const data = await graphqlRequest<{ signup: { token: string } }>({
+        query: SIGNUP_MUTATION,
+        variables: { name, email, password },
       });
-
-      const json = await res.json();
-
-      if (json.errors) {
-        setServerError(json.errors[0].message || "Signup failed");
-      } else {
-        const token = json.data.signup.token;
-        setAccessToken(token);
-        router.push("/login");
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Signup failed";
-      setServerError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }
+      return data.signup;
+    },
+    onSuccess: data => {
+      if (data.token) localStorage.setItem("access_token", data.token);
+      router.push(route.login);
+    },
+    onError: err => {
+      setErrors({ general: err.message || errorMessages.signup.signupFailed });
+      setServerError(err.message);
+    },
+  });
 
   return (
     <div className="page-content enter-password">
       <div className="card-container">
         <div className="card">
           <div className="user-details-page-grid">
-            <h1 className="page-heading" data-testid="SIGN_UP_PAGE_HEADING">
-              Create an account
+            <h1 className="page-heading" data-testid="signup-page-heading">
+              {labels.signup.createAccount}
             </h1>
             <div className="form-wrapper" id="userDetailsFormWrapper">
-              <form className="user-details-content-grid" onSubmit={onSubmit} noValidate>
+              <form
+                className="user-details-content-grid"
+                onSubmit={e => {
+                  e.preventDefault();
+                  handleSubmit(e, {
+                    name: name.trim(),
+                    email: email.trim(),
+                    password: password.trim(),
+                  });
+                }}
+                noValidate
+              >
                 <div className="user-details-input-fields-grid">
                   <div className="text-input-container type-text label-in-border">
-                    <label
-                      id="fullNameAriaLabel"
-                      className="visually-hidden"
-                      data-testid="SIGN_UP_INPUT_NAME_LABEL"
-                      htmlFor="fullName"
-                    >
-                      Full Name
-                    </label>
                     <div className="input-wrapper">
                       <input
                         autoComplete="given-name"
                         className={`input touched ${
                           fullNameError && touchedFullName ? "input-error" : ""
                         }`}
-                        data-testid="SIGN_UP_INPUT_NAME"
+                        data-testid="sign-up-input-name"
                         id="fullName"
                         name="fullName"
                         required
                         type="text"
                         value={name}
-                        onFocus={() => {
-                          if (!name.trim()) {
-                            setFullNameError("Enter your full name.");
-                          }
-                        }}
-                        onBlur={() => {
-                          setTouchedFullName(true);
-                          if (!name.trim()) {
-                            setFullNameError("Enter your full name.");
-                          }
-                        }}
-                        onChange={e => {
-                          const newName = e.target.value;
-                          setName(newName);
-                          setTouchedFullName(true);
-
-                          // Progressive validation (one error at a time)
-                          if (!newName.trim()) {
-                            setFullNameError("Enter your full name.");
-                          } else if (newName.trim().length < 4) {
-                            setFullNameError(
-                              "The full name must be longer than 3 characters long."
-                            );
-                          } else if (!newName.includes(" ")) {
-                            setFullNameError("Please provide your first and last name.");
-                          } else if (/[^a-zA-Z\s]/.test(newName)) {
-                            setFullNameError("No special characters please.");
-                          } else {
-                            // ✅ All rules passed
-                            setFullNameError(null);
-                          }
-                        }}
+                        onChange={e => handleNameChange(e.target.value)}
+                        onBlur={() => handleNameChange(name)}
                       />
                       <span className="pseudo-focus"></span>
                       <p aria-hidden="true" className="displayed-input-label">
-                        Full Name
+                        {labels.signup.fullName}
                       </p>
                     </div>
                     {touchedFullName && fullNameError && (
@@ -145,14 +115,6 @@ export default function Signup() {
                     )}
                   </div>
                   <div className="text-input-container type-email label-in-border">
-                    <label
-                      id="emailAriaLabel"
-                      className="visually-hidden"
-                      data-testid="SIGN_UP_INPUT_EMAIL_LABEL"
-                      htmlFor="email"
-                    >
-                      Email
-                    </label>
                     <div className="input-wrapper">
                       <input
                         autoComplete="email"
@@ -160,42 +122,18 @@ export default function Signup() {
                         className={`input touched ${
                           emailError && touchedEmail ? "input-error" : ""
                         }`}
-                        data-testid="SIGN_UP_INPUT_EMAIL"
+                        data-testid="sign-up-input-emailL"
                         id="email"
                         name="email"
                         required
                         type="email"
                         value={email}
-                        onFocus={() => {
-                          if (!email.trim()) {
-                            setEmailError("Enter your email address.");
-                          }
-                        }}
-                        onBlur={() => {
-                          setTouchedEmail(true);
-                          if (!email.trim()) {
-                            setEmailError("Enter your email address.");
-                          }
-                        }}
-                        onChange={e => {
-                          const newEmail = e.target.value;
-                          setEmail(newEmail);
-                          setTouchedEmail(true);
-
-                          // Validate live while typing
-                          if (!newEmail.trim()) {
-                            setEmailError("Enter your email address.");
-                          } else if (!/^\S+@\S+\.\S+$/.test(newEmail)) {
-                            setEmailError("Please enter a valid email address.");
-                          } else {
-                            // ✅ Valid email → clear errors
-                            setEmailError(null);
-                          }
-                        }}
+                        onChange={e => handleEmailChange(e.target.value)}
+                        onBlur={() => handleEmailChange(email)}
                       />
                       <span className="pseudo-focus"></span>
                       <p aria-hidden="true" className="displayed-input-label">
-                        Email
+                        {labels.signup.email}
                       </p>
                     </div>
                     {touchedEmail && emailError && (
@@ -206,79 +144,33 @@ export default function Signup() {
                     )}
                   </div>
                   <div className="text-input-container type-password label-in-border">
-                    <label
-                      id="passwordAriaLabel"
-                      className="visually-hidden"
-                      data-testid="SIGN_UP_INPUT_PASSWORD_LABEL"
-                      htmlFor="password"
-                    >
-                      Password
-                    </label>
                     <div className="input-wrapper">
                       <input
                         autoComplete="new-password"
                         className={`input touched initially-password ${
                           passwordErrors && touchedPassword ? "input-error" : ""
                         }`}
-                        data-testid="SIGN_UP_INPUT_PASSWORD"
+                        data-testid="sign-up-input-password"
                         id="password"
                         name="password"
                         required
                         type={showPassword ? "text" : "password"}
                         value={password}
-                        //onChange={e=>setPassword(e.target.value)}
+                        onChange={e => handlePasswordChange(e.target.value)}
+                        onBlur={() => handlePasswordChange(password)}
                         onFocus={() => {
                           setShowPasswordHints(true);
-                          if (!password.trim()) {
-                            setPasswordErrors(["Enter your password."]);
-                          }
-                        }}
-                        onBlur={() => {
-                          setTouchedPassword(true);
-                          if (!password.trim()) {
-                            setPasswordErrors(["Enter your password."]);
-                          }
-                        }}
-                        //onChange={handlePasswordChange}
-                        onChange={e => {
-                          const newPassword = e.target.value;
-                          setPassword(newPassword);
-                          setTouchedPassword(true);
-
-                          // Step-by-step validation
-                          if (!newPassword.trim()) {
-                            setPasswordErrors(["Enter your password."]);
-                          } else if (newPassword.length < 8) {
-                            setPasswordErrors([
-                              "Your password should be at least 8 characters long.",
-                            ]);
-                          } else if (!/[a-z]/.test(newPassword)) {
-                            setPasswordErrors(["Your password should contain a lowercase letter."]);
-                          } else if (!/[A-Z]/.test(newPassword)) {
-                            setPasswordErrors([
-                              "Your password should contain an uppercase letter.",
-                            ]);
-                          } else if (!/\d/.test(newPassword)) {
-                            setPasswordErrors(["Your password should contain a number."]);
-                          } else {
-                            // ✅ All conditions passed
-                            setPasswordErrors(null);
-                            setShowPasswordHints(false);
-                          }
                         }}
                       />
                       <span className="pseudo-focus"></span>
                       <p aria-hidden="true" className="displayed-input-label">
-                        Password
+                        {labels.signup.password}
                       </p>
                       <button
                         className="toggle-field-type"
-                        data-tracking-description="cta:toggle-password-visibility"
-                        data-tracking-location="Page"
                         type="button"
                         aria-label="Hide password in text field"
-                        data-tracking-text="Hide password in text field"
-                        data-testid="SIGN_UP_INPUT_PASSWORD_TOGGLE"
+                        data-testid="sign-up-input-password-toggle"
                         id="passwordToggle"
                         onClick={() => setShowPassword(!showPassword)}
                       >
@@ -294,12 +186,12 @@ export default function Signup() {
                   </div>
                   {showPasswordHints && (
                     <div className="password-hints">
-                      <p className="body-sm text bold dark">Make sure your password includes:</p>
+                      <p className="body-sm text bold dark">{labels.passwordHints.passwordHint}</p>
                       <ul className="password-hints-list">
-                        <li>At least 8 characters</li>
-                        <li>One uppercase letter</li>
-                        <li>One lowercase letter</li>
-                        <li>One number</li>
+                        <li>{labels.passwordHints.firstRule}</li>
+                        <li>{labels.passwordHints.secondRule}</li>
+                        <li>{labels.passwordHints.thirdRule}</li>
+                        <li>{labels.passwordHints.fourthRule}</li>
                       </ul>
                     </div>
                   )}
@@ -321,63 +213,55 @@ export default function Signup() {
                       <label
                         className="checkbox-label"
                         htmlFor="marketingOption"
-                        data-testid="marketingOption_LABEL"
-                        id="marketingOption_LABEL"
+                        data-testid="marketingOption_label"
+                        id="marketingOption_label"
                       >
-                        I am happy for Sky to use my contact details above and my address to update
-                        me about offers, products and services. You can change your preferences at
-                        any time online or by speaking to us. Please also read Sky&apos;s
+                        {labels.signup.consentText}
                         <br />
                         <a
                           className="privacy-link"
                           href="https://www.sky.com/help/articles/sky-privacy-and-cookies-notice?hideMasthead=true"
                           target="_blank"
                         >
-                          Privacy &amp; cookies notice.
+                          {labels.signup.privacycontentLink}
                         </a>
                       </label>
                     </div>
                   </div>
                 </div>
                 <p
-                  data-testid="SIGN_UP_DEFAULT_TERMS_AND_CONDITIONS"
+                  data-testid="sign-up-default-terms-and-condition"
                   className="body-sm text ta-left user-details-external-links dark"
                 >
-                  By continuing you confirm you have agreed to the <br />
+                  {labels.signup.confirmText} <br />
                   <a
                     href="https://www.sky.com/help/articles/sky-terms-and-conditions"
-                    data-testid="ACCEPT_TANDC_EXTERNAL_TC_LINK_1"
+                    data-testid="accept-terms-and-condition"
                     target="_blank"
                     className="nowrap"
                   >
-                    Sky Terms &amp; Conditions.
+                    {labels.signup.skyTermText}
                   </a>
                 </p>
                 {serverError && <div className="mb-2 text-sm text-red-700">{serverError}</div>}
                 <div className="user-details-button-and-link">
                   <button
                     className="btn primary full-width"
-                    data-testid="SIGN_UP_CREATE_ACCOUNT_BUTTON"
+                    data-testid="sign-up-create-account-button"
                     id="signUpContinueButton"
                     type="submit"
-                    data-tracking-description="cta:SIGN_UP_CREATE_ACCOUNT_BUTTON"
-                    data-tracking-location="Page"
-                    data-tracking-text="Create account"
                   >
                     {loading ? "Creating..." : "Create account"}
                   </button>
                   <div className="user-details-sign-in-wrap">
                     <span className="link-container inline">
                       <Link
-                        data-testid="SIGN_UP_LINK_TO_SIGN_IN"
-                        data-tracking-description="cta:SIGN_UP_LINK_TO_SIGN_IN"
-                        data-tracking-location="Page"
-                        data-tracking-text="Back to sign in"
+                        data-testid="sign-up-link-to-sign-in"
                         href="/"
                         className="link body dark active"
                         aria-current="page"
                       >
-                        Back to sign in
+                        {labels.signup.backToSignIn}
                       </Link>
                       <span className="pseudo-focus"></span>
                     </span>
