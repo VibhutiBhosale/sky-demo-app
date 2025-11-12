@@ -37,14 +37,14 @@ export default defineConfig([
       'prettier/prettier': [
         'error',
         {
-          endOfLine: 'auto',
-          semi: true,
-          singleQuote: true,
-          trailingComma: 'all',
-          tabWidth: 2,
-          printWidth: 100,
-          arrowParens: 'always',
-          bracketSpacing: true,
+          "semi": true,
+          "singleQuote": false,
+          "tabWidth": 2,
+          "trailingComma": "es5",
+          "printWidth": 100,
+          "bracketSpacing": true,
+          "arrowParens": "avoid",
+          "endOfLine": "auto",
         },
       ],
 

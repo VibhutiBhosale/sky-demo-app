@@ -172,12 +172,20 @@ export const resolvers = {
         });
 
         if (!user) {
-          return { success: false, message: 'Account not found.' };
+          return {
+            success: false,
+            message:
+              'The password you entered is incorrect. Please try again or use the forgotten your password link below.',
+          };
         }
 
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-          return { success: false, message: 'Incorrect password.' };
+          return {
+            success: false,
+            message:
+              'The password you entered is incorrect. Please try again or use the forgotten your password link below.',
+          };
         }
 
         const token = jwt.sign(

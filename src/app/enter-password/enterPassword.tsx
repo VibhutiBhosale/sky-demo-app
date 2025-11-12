@@ -1,129 +1,98 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import ErrorIcon from '../../components/icons/ErrorIcon';
-import NextIcon from '../../components/icons/NextIcon';
-import PasswordToggleOnIcon from '../../components/icons/PasswordToggleOnIcon';
-import PasswordToggleOffIcon from '../../components/icons/PasswordToggleOffIcon';
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import ErrorIcon from "@/components/icons/ErrorIcon";
+import NextIcon from "@/components/icons/NextIcon";
+import PasswordToggleOnIcon from "@/components/icons/PasswordToggleOnIcon";
+import PasswordToggleOffIcon from "@/components/icons/PasswordToggleOffIcon";
+import { useFormSubmit } from "@/hooks/useFormSubmit";
+import { VERIFY_PASSWORD_MUTATION } from "@/graphql/mutations/auth";
+import { graphqlRequest } from "@/lib/apiClient";
+import { errorMessages, labels, route } from "@/constants";
 
 export default function EnterPassword() {
   const router = useRouter();
 
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [identifier, setIdentifier] = useState<string | null>(null);
+  const [identifier, setIdentifier] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   useEffect(() => {
-    const storedIdentifier = sessionStorage.getItem('login_identifier');
-    if (!storedIdentifier) {
-      // If no identifier found, redirect back to login
-      router.push('/login');
-    } else {
-      setIdentifier(storedIdentifier);
-    }
+    (async () => {
+      const storedIdentifier = sessionStorage.getItem("login_identifier");
+      if (!storedIdentifier) {
+        await router.push(route.login);
+      } else {
+        setIdentifier(storedIdentifier);
+      }
+    })();
   }, [router]);
 
-  // 🧩 Local validation
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!password.trim()) {
-      newErrors.password = 'Enter your password.';
-    }
-    return newErrors;
-  };
-
-  // 🔐 Submit handler
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    const newErrors = validate();
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // GraphQL mutation to verify password
-      const query = `
-        mutation VerifyPassword($identifier: String!, $password: String!) {
-          verifyPassword(identifier: $identifier, password: $password) {
-            success
-            message
-            token
-          }
-        }
-      `;
-
-      const res = await fetch('/api/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query,
-          variables: { identifier, password },
-        }),
+  const { handleSubmit, errors, loading, setErrors } = useFormSubmit({
+    validate: () => {
+      const errs: Record<string, string> = {};
+      if (!password) errs.password = errorMessages.enterPassword.requiredField;
+      return errs;
+    },
+    request: async ({ identifier, password }: { identifier: string; password: string }) => {
+      const data = await graphqlRequest<{
+        verifyPassword: { success: boolean; message?: string; token?: string };
+      }>({
+        query: VERIFY_PASSWORD_MUTATION,
+        variables: { identifier, password },
       });
-
-      const { data, errors: gqlErrors } = await res.json();
-
-      if (gqlErrors || !data?.verifyPassword) {
-        throw new Error(gqlErrors?.[0]?.message || 'Unexpected error');
+      if (!data.verifyPassword.success) {
+        throw new Error(
+          data.verifyPassword.message || errorMessages.enterPassword.passwordVrificationFailed
+        );
       }
 
-      const { success, message, token } = data.verifyPassword;
-
+      return data.verifyPassword;
+    },
+    onSuccess: ({ success, token, message }) => {
       if (success) {
-        sessionStorage.removeItem('login_identifier');
-        // ✅ Store token if provided (optional)
-        if (token) localStorage.setItem('access_token', token);
+        sessionStorage.removeItem("login_identifier");
+        if (token) localStorage.setItem("access_token", token);
+        router.push("/");
+      } else {
+        setErrors({
+          password: message || errorMessages.enterPassword.incorrectPassword,
+        });
+      }
+    },
+    onError: () => {
+      setErrors({
+        password: errorMessages.enterPassword.incorrectPassword,
+      });
+    },
+  });
 
-        // ✅ Redirect to home or dashboard
-        router.push('/');
-      } else {
-        setErrors({ password: message || 'Incorrect password.' });
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error('Unknown error:', err);
-      }
-      setErrors({ password: 'Incorrect password. Please try again.' });
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <div className="page-content enter-password">
       <div className="card-container">
         <div className="card">
           <div className="sign-in-outer-grid">
-            <h2 className="page-heading" data-testid="IDENTIFIER_PAGE_HEADING">
-              Welcome back
+            <h2 className="page-heading" data-testid="identifier-page-heading">
+              {labels.enterPassword.welcomeLebel}
             </h2>
             <h3
-              data-testid="IDENTIFIER_PAGE_SUB_HEADING"
+              data-testid="identifier-page-sub-heading"
               aria-hidden="true"
               className="body text dark"
             >
-              vibhuti.2008@gmail.com
+              {identifier}
             </h3>
             <div className="change-email-link-wrapper">
               <span className="link-container inline">
                 <Link
                   href="/"
-                  data-testid="PASSWORD_CHANGE_IDENTIFIER_LINK"
-                  data-tracking-description="cta:PASSWORD_CHANGE_IDENTIFIER_LINK"
-                  data-tracking-location="Page"
-                  data-tracking-text="Change email or username"
+                  data-testid="password-change-identifier-link"
                   className="link body dark active"
                   aria-current="page"
                 >
                   <span className="text-link-with-chevron-content">
-                    Change email or username
+                    {labels.enterPassword.changeemailandUsername}
                     <NextIcon />
                   </span>
                 </Link>
@@ -132,20 +101,24 @@ export default function EnterPassword() {
             </div>
 
             <div className="form-wrapper" id="identifierFormWrapper">
-              <form className="form-input-and-control-grid" onSubmit={handleSubmit} noValidate>
+              <form
+                className="form-input-and-control-grid"
+                onSubmit={e => handleSubmit(e, { identifier, password })}
+                noValidate
+              >
                 <div className="text-input-container type-text label-in-border">
                   <div className="input-wrapper">
                     <input
                       autoComplete="current-password"
-                      className={`input touched ${errors.password ? 'input-error' : ''}`}
-                      data-testid="PASSWORD_INPUT"
+                      className={`input touched ${errors.password ? "input-error" : ""}`}
+                      data-testid="password-input"
                       id="password"
                       maxLength={256}
                       name="password"
                       required
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => {
+                      onChange={e => {
                         setPassword(e.target.value);
                         if (errors.password) setErrors({});
                       }}
@@ -157,12 +130,9 @@ export default function EnterPassword() {
                     </p>
                     <button
                       className="toggle-field-type"
-                      data-tracking-description="cta:toggle-password-visibility"
-                      data-tracking-location="Page"
                       type="button"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      data-tracking-text="Hide password in text field"
-                      data-testid="PASSWORD_INPUT_TOGGLE"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      data-testid="password-input-toggle"
                       id="passwordToggle"
                       onClick={() => setShowPassword(!showPassword)}
                     >
@@ -174,7 +144,7 @@ export default function EnterPassword() {
                       <ErrorIcon />
                       <p
                         id="identifierAriaErrorText"
-                        data-testid="IDENTIFIER_INPUT_ERROR"
+                        data-testid="identifier-input-error"
                         className="body-sm text ta-left error-message negative-regular"
                       >
                         {errors.password}
@@ -185,28 +155,22 @@ export default function EnterPassword() {
                 <div className="identifier-links-and-button-grid">
                   <span className="link-container inline">
                     <a
-                      data-testid="IDENTIFIER_FORGOTTEN_USERNAME_LINK"
+                      data-testid="identifier-forgotton-username-link"
                       id="forgotUsernameLink"
-                      data-tracking-description="cta:IDENTIFIER_FORGOTTEN_USERNAME_LINK"
-                      data-tracking-location="Page"
-                      data-tracking-text="Forgotten your email or username?"
                       href="https://skyid.sky.com/forgotusername/skycom/7b2261223a2268747470733a2f2f69642e736b792e636f6d2f222c2262223a2268747470733a2f2f69642e736b792e636f6d2f227d"
                       className="link body dark inactive"
                     >
-                      Forgotten your password?
+                      {labels.enterPassword.forgotPasswordLink}
                     </a>
                     <span className="pseudo-focus"></span>
                   </span>
                   <button
                     className="btn primary full-width"
-                    data-testid="IDENTIFIER_SUBMIT"
+                    data-testid="identifier-submit"
                     type="submit"
-                    data-tracking-description="cta:IDENTIFIER_SUBMIT"
-                    data-tracking-location="Page"
-                    data-tracking-text="Continue"
                     disabled={loading}
                   >
-                    {loading ? 'Verifying...' : 'Continue'}
+                    {loading ? "Verifying..." : "Continue"}
                   </button>
                 </div>
               </form>

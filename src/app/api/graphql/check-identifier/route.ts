@@ -1,13 +1,12 @@
-// src/app/api/check-identifier/route.ts
-import { NextResponse } from 'next/server';
-import dbConnect from '../../../../lib/mongodb';
-import User from '../../../../models/User'; // Your Mongoose model
+import { NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import User from "@/models/User"; // Your Mongoose model
 
 export async function POST(req: Request) {
   try {
     const { identifier } = await req.json();
     if (!identifier) {
-      return NextResponse.json({ success: false, message: 'Missing identifier' }, { status: 400 });
+      return NextResponse.json({ success: false, message: "Missing identifier" }, { status: 400 });
     }
 
     await dbConnect();
@@ -21,12 +20,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json(
-        { success: false, message: "We can't find an account matching that email or username." },
-        { status: 200 },
+        {
+          success: false,
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "We can't find an account matching that email or username.",
+          },
+        },
+        { status: 200 }
       );
     }
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
