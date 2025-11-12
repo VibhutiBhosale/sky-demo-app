@@ -1,0 +1,92 @@
+.banner-wrapper {
+  border: 0px;
+  list-style: none;
+  background-image: linear-gradient(
+    to right,
+    rgb(255, 140, 0) 5%,
+    rgb(248, 0, 50) 25%,
+    rgb(255, 0, 160) 45%,
+    rgb(140, 40, 255) 65%,
+    rgb(0, 35, 255) 82%,
+    rgb(25, 160, 255) 96%
+  );
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  .banner-text {
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    font-weight: bold;
+    margin: -4px;
+    outline: none;
+    padding: 4px;
+    position: relative;
+    text-align: left;
+    text-decoration: none;
+    transition: 200ms ease-out;
+    font-size: 1.125rem;
+    line-height: 24px;
+    vertical-align: middle;
+    color: rgb(255, 255, 255);
+    &::before {
+      content: "";
+      height: 44px;
+      left: -4px;
+      position: absolute;
+      right: -4px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    svg {
+      fill: white;
+      flex: 0 0 auto;
+      height: 16px;
+      width: 16px;
+      margin-left: 4px;
+    }
+  }
+  .banner-content {
+    border: 0px;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-right: 48px;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    position: relative;
+  }
+  .button-position {
+    position: absolute;
+    right: 4px;
+    top: 0px;
+    .banner-close {
+      align-items: center;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      flex: 0 0 auto;
+      justify-content: center;
+      outline: none;
+      padding: 0px;
+      position: relative;
+      transition: 200ms ease-out;
+      background-color: transparent;
+      color: rgb(255, 255, 255);
+      height: 44px;
+      width: 44px;
+      svg {
+        fill: currentcolor;
+        flex: 0 0 auto;
+        height: 24px;
+        width: 24px;
+      }
+    }
+  }
+}

@@ -1,6 +1,8 @@
-import Image from 'next/image';
+'use client';
+import { usePathname } from 'next/navigation';
+import AuthHeader from '../components/organisms/header/AuthHeader';
+import MainHeader from '../components/organisms/header/MainHeader';
 import './globals.css';
-import '../styles/header.scss';
 import '../styles/footer.scss';
 
 export default function RootLayout({
@@ -8,19 +10,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+
+  // Define pages that use the Auth header
+  const authRoutes = ['/login', '/signup', '/enter-password'];
+
+  // Choose which header to render
+  const isAuthPage = authRoutes.some(route => pathname.startsWith(route));
   return (
     <html lang="en">
       <body className={`antialiased`}>
-        <header className="masthead" role="banner">
-          <Image
-            className="masthead-logo"
-            src="https://id.sky.com/static-assets/sky-logo-small.png"
-            alt="Sky logo"
-            width={41}
-            height={25}
-          />
-        </header>
-        <main className="main-content max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {isAuthPage ? <AuthHeader /> : <MainHeader />}
+        <main className="main-content">
           {/* Main content goes here */}
           {children}
         </main>
