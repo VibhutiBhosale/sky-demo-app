@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ErrorIcon from '../../components/icons/ErrorIcon';
 
-
 export default function LoginPage() {
   const router = useRouter();
   const [identifier, setIdentifier] = useState('');
@@ -47,8 +46,7 @@ export default function LoginPage() {
       } else {
         setErrors({
           email:
-            data.message ||
-            "We can't find an account matching that email address or username.",
+            data.message || "We can't find an account matching that email address or username.",
         });
       }
     } catch (err) {
@@ -58,7 +56,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="page-content">

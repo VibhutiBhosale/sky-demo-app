@@ -1,9 +1,9 @@
-"use client";
-import { useState } from "react";
-import CloseIcon from "../../icons/CloseIcon";
-import NextIcon from "@/components/icons/NextIcon";
+'use client';
+import { useState } from 'react';
+import CloseIcon from '../../icons/CloseIcon';
+import NextIcon from '@/components/icons/NextIcon';
 
-import "./dismissibleBanner.scss";
+import './dismissibleBanner.scss';
 
 type DismissibleBannerProps = {
   content: string;
@@ -23,13 +23,13 @@ export default function DismissibleBanner({ content }: DismissibleBannerProps) {
         >
           {content}
           <NextIcon />
-        </a>        
+        </a>
       </div>
       <div className="button-position">
-          <button onClick={() => setVisible(false)} className="banner-close">
-            <CloseIcon />
-          </button>
-        </div>
+        <button onClick={() => setVisible(false)} className="banner-close">
+          <CloseIcon />
+        </button>
+      </div>
     </div>
   );
 }

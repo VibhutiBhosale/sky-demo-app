@@ -3,7 +3,7 @@ export default function ErrorIcon() {
     <svg
       viewBox="0 0 28 28"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-6 h-6 fill-red-600"
+      className="h-6 w-6 fill-red-600"
       fill="#ff0000"
     >
       <path

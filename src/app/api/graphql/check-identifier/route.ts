@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     } else {
       return NextResponse.json(
         { success: false, message: "We can't find an account matching that email or username." },
-        { status: 200 }
+        { status: 200 },
       );
     }
   } catch (error) {

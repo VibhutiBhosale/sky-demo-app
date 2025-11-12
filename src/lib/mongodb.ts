@@ -1,9 +1,9 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose, { Mongoose } from 'mongoose';
 
 const uri = process.env.MONGODB_URI;
 
 if (!uri) {
-  throw new Error("Please set the MONGODB_URI environment variable.");
+  throw new Error('Please set the MONGODB_URI environment variable.');
 }
 
 // Define a global cache type to prevent duplicate connections
@@ -14,7 +14,6 @@ interface MongooseCache {
 
 // Extend global type to include mongoose cache
 declare global {
-  // eslint-disable-next-line no-var
   var mongooseCache: MongooseCache | undefined;
 }
 
@@ -32,7 +31,7 @@ export async function dbConnect(): Promise<Mongoose> {
     //use non-null assertion (!) to tell TS “uri is definitely defined”
     cached.promise = mongoose
       .connect(uri!, {
-        dbName: "sky-demo",
+        dbName: 'sky-demo',
         bufferCommands: false,
       })
       .then((mongooseInstance) => mongooseInstance);
@@ -43,4 +42,3 @@ export async function dbConnect(): Promise<Mongoose> {
 }
 
 export default dbConnect;
-

@@ -7,9 +7,12 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "prepare": "husky install",
     "sonar": "sonar-scanner",
-    "lint:sonar": "sonar-scanner"
+    "lint:sonar": "sonar-scanner",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
@@ -46,7 +49,7 @@
     "eslint-config-next": "^16.0.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
-    "husky": "^8.0.0",
+    "husky": "^8.0.3",
     "jest": "^30.2.0",
     "lint-staged": "^16.2.6",
     "postcss": "^8.5.6",
@@ -57,5 +60,16 @@
     "tailwindcss": "^4.1.17",
     "ts-jest": "^29.4.5",
     "typescript": "^5.9.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

@@ -16,7 +16,7 @@ export default function RootLayout({
   const authRoutes = ['/login', '/signup', '/enter-password'];
 
   // Choose which header to render
-  const isAuthPage = authRoutes.some(route => pathname.startsWith(route));
+  const isAuthPage = authRoutes.some((route) => pathname.startsWith(route));
   return (
     <html lang="en">
       <body className={`antialiased`}>

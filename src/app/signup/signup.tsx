@@ -1,12 +1,12 @@
 // src/app/signup/page.tsx
-"use client";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { setAccessToken } from "../../lib/clientAuth";
-import Link from "next/link";
-import PasswordToggleOnIcon from "../../components/icons/PasswordToggleOnIcon";
-import PasswordToggleOffIcon from "../../components/icons/PasswordToggleOffIcon";
-import ErrorIcon from "../../components/icons/ErrorIcon";
+'use client';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { setAccessToken } from '../../lib/clientAuth';
+import Link from 'next/link';
+import PasswordToggleOnIcon from '../../components/icons/PasswordToggleOnIcon';
+import PasswordToggleOffIcon from '../../components/icons/PasswordToggleOffIcon';
+import ErrorIcon from '../../components/icons/ErrorIcon';
 
 const SIGNUP_MUTATION = `
 mutation Signup($name: String, $email: String!, $password: String!) {
@@ -19,9 +19,9 @@ mutation Signup($name: String, $email: String!, $password: String!) {
 
 export default function Signup() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPasswordHints, setShowPasswordHints] = useState(false);
@@ -40,10 +40,10 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+      const res = await fetch('/api/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           query: SIGNUP_MUTATION,
           variables: { name, email, password },
@@ -53,14 +53,14 @@ export default function Signup() {
       const json = await res.json();
 
       if (json.errors) {
-        setServerError(json.errors[0].message || "Signup failed");
+        setServerError(json.errors[0].message || 'Signup failed');
       } else {
         const token = json.data.signup.token;
         setAccessToken(token);
-        router.push("/login");
+        router.push('/login');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Signup failed";
+      const errorMessage = err instanceof Error ? err.message : 'Signup failed';
       setServerError(errorMessage);
     } finally {
       setLoading(false);
@@ -91,7 +91,7 @@ export default function Signup() {
                       <input
                         autoComplete="given-name"
                         className={`input touched ${
-                          fullNameError && touchedFullName ? "input-error" : ""
+                          fullNameError && touchedFullName ? 'input-error' : ''
                         }`}
                         data-testid="SIGN_UP_INPUT_NAME"
                         id="fullName"
@@ -101,31 +101,31 @@ export default function Signup() {
                         value={name}
                         onFocus={() => {
                           if (!name.trim()) {
-                            setFullNameError("Enter your full name.");
+                            setFullNameError('Enter your full name.');
                           }
                         }}
                         onBlur={() => {
                           setTouchedFullName(true);
                           if (!name.trim()) {
-                            setFullNameError("Enter your full name.");
+                            setFullNameError('Enter your full name.');
                           }
                         }}
-                        onChange={e => {
+                        onChange={(e) => {
                           const newName = e.target.value;
                           setName(newName);
                           setTouchedFullName(true);
 
                           // Progressive validation (one error at a time)
                           if (!newName.trim()) {
-                            setFullNameError("Enter your full name.");
+                            setFullNameError('Enter your full name.');
                           } else if (newName.trim().length < 4) {
                             setFullNameError(
-                              "The full name must be longer than 3 characters long."
+                              'The full name must be longer than 3 characters long.',
                             );
-                          } else if (!newName.includes(" ")) {
-                            setFullNameError("Please provide your first and last name.");
+                          } else if (!newName.includes(' ')) {
+                            setFullNameError('Please provide your first and last name.');
                           } else if (/[^a-zA-Z\s]/.test(newName)) {
-                            setFullNameError("No special characters please.");
+                            setFullNameError('No special characters please.');
                           } else {
                             // ✅ All rules passed
                             setFullNameError(null);
@@ -158,7 +158,7 @@ export default function Signup() {
                         autoComplete="email"
                         autoCapitalize="off"
                         className={`input touched ${
-                          emailError && touchedEmail ? "input-error" : ""
+                          emailError && touchedEmail ? 'input-error' : ''
                         }`}
                         data-testid="SIGN_UP_INPUT_EMAIL"
                         id="email"
@@ -168,25 +168,25 @@ export default function Signup() {
                         value={email}
                         onFocus={() => {
                           if (!email.trim()) {
-                            setEmailError("Enter your email address.");
+                            setEmailError('Enter your email address.');
                           }
                         }}
                         onBlur={() => {
                           setTouchedEmail(true);
                           if (!email.trim()) {
-                            setEmailError("Enter your email address.");
+                            setEmailError('Enter your email address.');
                           }
                         }}
-                        onChange={e => {
+                        onChange={(e) => {
                           const newEmail = e.target.value;
                           setEmail(newEmail);
                           setTouchedEmail(true);
 
                           // Validate live while typing
                           if (!newEmail.trim()) {
-                            setEmailError("Enter your email address.");
+                            setEmailError('Enter your email address.');
                           } else if (!/^\S+@\S+\.\S+$/.test(newEmail)) {
-                            setEmailError("Please enter a valid email address.");
+                            setEmailError('Please enter a valid email address.');
                           } else {
                             // ✅ Valid email → clear errors
                             setEmailError(null);
@@ -218,48 +218,48 @@ export default function Signup() {
                       <input
                         autoComplete="new-password"
                         className={`input touched initially-password ${
-                          passwordErrors && touchedPassword ? "input-error" : ""
+                          passwordErrors && touchedPassword ? 'input-error' : ''
                         }`}
                         data-testid="SIGN_UP_INPUT_PASSWORD"
                         id="password"
                         name="password"
                         required
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         value={password}
                         //onChange={e=>setPassword(e.target.value)}
                         onFocus={() => {
                           setShowPasswordHints(true);
                           if (!password.trim()) {
-                            setPasswordErrors(["Enter your password."]);
+                            setPasswordErrors(['Enter your password.']);
                           }
                         }}
                         onBlur={() => {
                           setTouchedPassword(true);
                           if (!password.trim()) {
-                            setPasswordErrors(["Enter your password."]);
+                            setPasswordErrors(['Enter your password.']);
                           }
                         }}
                         //onChange={handlePasswordChange}
-                        onChange={e => {
+                        onChange={(e) => {
                           const newPassword = e.target.value;
                           setPassword(newPassword);
                           setTouchedPassword(true);
 
                           // Step-by-step validation
                           if (!newPassword.trim()) {
-                            setPasswordErrors(["Enter your password."]);
+                            setPasswordErrors(['Enter your password.']);
                           } else if (newPassword.length < 8) {
                             setPasswordErrors([
-                              "Your password should be at least 8 characters long.",
+                              'Your password should be at least 8 characters long.',
                             ]);
                           } else if (!/[a-z]/.test(newPassword)) {
-                            setPasswordErrors(["Your password should contain a lowercase letter."]);
+                            setPasswordErrors(['Your password should contain a lowercase letter.']);
                           } else if (!/[A-Z]/.test(newPassword)) {
                             setPasswordErrors([
-                              "Your password should contain an uppercase letter.",
+                              'Your password should contain an uppercase letter.',
                             ]);
                           } else if (!/\d/.test(newPassword)) {
-                            setPasswordErrors(["Your password should contain a number."]);
+                            setPasswordErrors(['Your password should contain a number.']);
                           } else {
                             // ✅ All conditions passed
                             setPasswordErrors(null);
@@ -313,7 +313,7 @@ export default function Signup() {
                         id="marketingOption"
                         data-testid="marketingOption"
                         checked={marketingOptIn}
-                        onChange={e => setMarketingOptIn(e.target.checked)}
+                        onChange={(e) => setMarketingOptIn(e.target.checked)}
                       />
                       <span className="pseudo-focus"></span>
                     </div>
@@ -364,7 +364,7 @@ export default function Signup() {
                     data-tracking-location="Page"
                     data-tracking-text="Create account"
                   >
-                    {loading ? "Creating..." : "Create account"}
+                    {loading ? 'Creating...' : 'Create account'}
                   </button>
                   <div className="user-details-sign-in-wrap">
                     <span className="link-container inline">

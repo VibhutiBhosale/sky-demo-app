@@ -68,9 +68,7 @@ export default function MainHeader() {
               data-tracking-location="Header"
               data-test-id="logo-link"
             >
-              <span className="label">
-                Sky home page
-              </span>
+              <span className="label">Sky home page</span>
             </a>
           </div>
           <div className="nav-toggle-wrapper" data-test-id="header-burger-toggle">
@@ -117,14 +115,8 @@ export default function MainHeader() {
                 <div className="nav-wrapper">
                   <nav aria-label="primary" data-test-id="nav">
                     <ul className="primary-nav-list" data-test-id="primary-nav-list">
-                      <li
-                        className="nav-item primary-nav-item"
-                        data-test-id="nav-item"
-                      >
-                        <div
-                          className="nav-item-group"
-                          data-test-id="nav-item-group"
-                        >
+                      <li className="nav-item primary-nav-item" data-test-id="nav-item">
+                        <div className="nav-item-group" data-test-id="nav-item-group">
                           <div className="nav-item-group-ctas">
                             <a
                               href="/watch"
@@ -177,10 +169,7 @@ export default function MainHeader() {
                             </button>
                           </div>
                           <div className="secondary-nav-wrapper">
-                            <ul
-                              className="secondary-nav-list"
-                              data-test-id="secondary-nav-list"
-                            >
+                            <ul className="secondary-nav-list" data-test-id="secondary-nav-list">
                               <li className="secondary-nav-item">
                                 <div className="nav-item-link-wrapper tab-focus">
                                   <a
@@ -267,14 +256,8 @@ export default function MainHeader() {
                           </div>
                         </div>
                       </li>
-                      <li
-                        className="nav-item primary-nav-item"
-                        data-test-id="nav-item"
-                      >
-                        <div
-                          className="nav-item-group"
-                          data-test-id="nav-item-group"
-                        >
+                      <li className="nav-item primary-nav-item" data-test-id="nav-item">
+                        <div className="nav-item-group" data-test-id="nav-item-group">
                           <div className="nav-item-group-ctas">
                             <a
                               href="/tv"
@@ -327,10 +310,7 @@ export default function MainHeader() {
                             </button>
                           </div>
                           <div className="secondary-nav-wrapper">
-                            <ul
-                              className="secondary-nav-list"
-                              data-test-id="secondary-nav-list"
-                            >
+                            <ul className="secondary-nav-list" data-test-id="secondary-nav-list">
                               <li className="secondary-nav-item">
                                 <div className="nav-item-link-wrapper tab-focus">
                                   <a
@@ -960,7 +940,6 @@ export default function MainHeader() {
                       </g>
                     </svg>
                   </button>
-                  
                 </div>
               </div>
               <div
@@ -1001,10 +980,8 @@ export default function MainHeader() {
                     </div>
                   </button>
                 </div>
-                
               </div>
             </div>
-            
           </div>
           <div className="user-menu-wrapper svelte-1m3po1p" data-test-id="header-user-wrapper">
             <a

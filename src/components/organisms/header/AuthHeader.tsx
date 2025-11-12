@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from 'next/image';
 import './authHeader.scss';
 
 export default function AuthHeader() {

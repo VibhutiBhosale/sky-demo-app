@@ -5,8 +5,8 @@ export let accessToken: string | null = null;
 export function setAccessToken(token: string | null) {
   accessToken = token;
   try {
-    if (token) localStorage.setItem("accessToken", token);
-    else localStorage.removeItem("accessToken");
+    if (token) localStorage.setItem('accessToken', token);
+    else localStorage.removeItem('accessToken');
   } catch (e) {
     // ignore (SSR or blocked)
   }
@@ -14,7 +14,7 @@ export function setAccessToken(token: string | null) {
 
 export function loadAccessTokenFromStorage() {
   try {
-    const t = localStorage.getItem("accessToken");
+    const t = localStorage.getItem('accessToken');
     accessToken = t;
     return t;
   } catch (e) {
@@ -25,10 +25,10 @@ export function loadAccessTokenFromStorage() {
 export async function refreshAccessToken() {
   // calls /api/refresh (sends cookies automatically). returns token or null.
   try {
-    const res = await fetch("/api/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // important for cookies
+    const res = await fetch('/api/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // important for cookies
     });
     const json = await res.json();
     if (json.ok && json.token) {
