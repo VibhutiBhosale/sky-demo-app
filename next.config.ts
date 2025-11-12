@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: "https",
+        hostname: "static.skyassets.com",
+      },
     ],
   },
 };

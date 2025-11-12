@@ -1,3 +1,4 @@
+@reference "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -79,11 +80,8 @@
   --color-background: var(--color-grey2);
 }
 html,
-body,
-#__next {
-  font-family:
-    Sky Text,
-    sans-serif;
+body{
+  font-family: "Sky Text", sans-serif;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
@@ -102,8 +100,9 @@ main {
 }
 
 a {
-  text-decoration: none;
-  cursor: pointer;
+    color: rgb(0, 15, 245);
+    cursor: pointer;
+    text-decoration: none;
 }
 
 p {
@@ -115,3 +114,8 @@ p {
     background-color: var(--color-background);
   }
 }
+
+
+
+
+
