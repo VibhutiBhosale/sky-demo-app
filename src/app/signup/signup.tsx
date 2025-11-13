@@ -56,9 +56,17 @@ export default function Signup() {
     },
     onSuccess: data => {
       if (data.token) localStorage.setItem("access_token", data.token);
-      router.push(route.login);
+      router.push(route.verifyEmail);
     },
     onError: err => {
+      if (err.message === errorMessages.signup.signupFailed) {
+        form.setErrors(prev => ({
+          ...prev,
+          emailError: errorMessages.signup.emailAlreadyExist,
+        }));
+        setServerError(null);
+        return;
+      }
       setErrors({ general: err.message || errorMessages.signup.signupFailed });
       setServerError(err.message);
     },

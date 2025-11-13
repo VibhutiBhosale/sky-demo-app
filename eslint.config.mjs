@@ -69,5 +69,6 @@ export default defineConfig([
     '*.config.js',
     '*.config.cjs',
     '*.config.mjs',
+    'scripts/**',
   ]),
 ]);

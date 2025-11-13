@@ -31,4 +31,8 @@ export const labels = {
     thirdRule: "One lowercase letter",
     fourthRule: "One number",
   },
+  verifyEmail: {
+    heading: "Verify your email",
+    subHeading: "Enter the 6-digit code we’ve sent to:",
+  },
 };

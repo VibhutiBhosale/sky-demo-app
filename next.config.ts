@@ -1,11 +1,11 @@
-import type { NextConfig } from 'next';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  webpack: (config) => {
+  webpack: config => {
     config.externals = config.externals || [];
     config.externals.push({
-      '@yaacovcr/transform': 'commonjs @yaacovcr/transform',
+      "@yaacovcr/transform": "commonjs @yaacovcr/transform",
     });
     return config;
   },
@@ -13,14 +13,14 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'id.sky.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "id.sky.com",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'static.skyassets.com',
+        protocol: "https",
+        hostname: "static.skyassets.com",
       },
     ],
   },

@@ -1,5 +1,5 @@
-import Image from 'next/image';
-import './heroBanner.scss';
+import Image from "next/image";
+import "./heroBanner.scss";
 
 export default function HeroBanner() {
   return (

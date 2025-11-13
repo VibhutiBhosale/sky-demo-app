@@ -1,9 +1,9 @@
-'use client';
-import { usePathname } from 'next/navigation';
-import AuthHeader from '../components/organisms/header/AuthHeader';
-import MainHeader from '../components/organisms/header/MainHeader';
-import './globals.css';
-import '../styles/footer.scss';
+"use client";
+import { usePathname } from "next/navigation";
+import AuthHeader from "../components/organisms/header/AuthHeader";
+import MainHeader from "../components/organisms/header/MainHeader";
+import "./globals.css";
+import "../styles/footer.scss";
 
 export default function RootLayout({
   children,
@@ -13,12 +13,14 @@ export default function RootLayout({
   const pathname = usePathname();
 
   // Define pages that use the Auth header
-  const authRoutes = ['/login', '/signup', '/enter-password'];
+  const authRoutes = ["/login", "/signup", "/enter-password"];
 
   // Choose which header to render
-  const isAuthPage = authRoutes.some((route) => pathname.startsWith(route));
+  const isAuthPage = authRoutes.some(route => pathname.startsWith(route));
   return (
     <html lang="en">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" type="image/ico" href="https://id.sky.com/favicon.ico"></link>
       <body className={`antialiased`}>
         {isAuthPage ? <AuthHeader /> : <MainHeader />}
         <main className="main-content">
