@@ -1,9 +1,9 @@
-'use client';
-import { useState } from 'react';
-import CloseIcon from '../../icons/CloseIcon';
-import NextIcon from '@/components/icons/NextIcon';
+"use client";
+import { useState } from "react";
+import CloseIcon from "../../icons/CloseIcon";
+import NextIcon from "@/components/icons/NextIcon";
 
-import './dismissibleBanner.scss';
+import "./dismissibleBanner.scss";
 
 type DismissibleBannerProps = {
   content: string;

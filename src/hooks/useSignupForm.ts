@@ -1,5 +1,5 @@
-'use client';
-import { useState } from 'react';
+"use client";
+import { useState } from "react";
 
 type SignupFormFields = {
   name: string;
@@ -15,9 +15,9 @@ type SignupFormErrors = {
 
 export function useSignupForm() {
   const [values, setValues] = useState<SignupFormFields>({
-    name: '',
-    email: '',
-    password: '',
+    name: "",
+    email: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState<SignupFormErrors>({
@@ -34,25 +34,25 @@ export function useSignupForm() {
 
   // ✅ Field-level validation
   const validateFullName = (value: string): string | null => {
-    if (!value.trim()) return 'Enter your full name.';
-    if (value.trim().length < 4) return 'The full name must be longer than 3 characters.';
-    if (!value.includes(' ')) return 'Please provide your first and last name.';
-    if (/[^a-zA-Z\s]/.test(value)) return 'No special characters please.';
+    if (!value.trim()) return "Enter your full name.";
+    if (value.trim().length < 4) return "The full name must be longer than 3 characters.";
+    if (!value.includes(" ")) return "Please provide your first and last name.";
+    if (/[^a-zA-Z\s]/.test(value)) return "No special characters please.";
     return null;
   };
 
   const validateEmail = (value: string): string | null => {
-    if (!value.trim()) return 'Enter your email address.';
-    if (!/^\S+@\S+\.\S+$/.test(value)) return 'Please enter a valid email address.';
+    if (!value.trim()) return "Enter your email address.";
+    if (!/^\S+@\S+\.\S+$/.test(value)) return "Please enter a valid email address.";
     return null;
   };
 
   const validatePassword = (value: string): string[] | null => {
-    if (!value.trim()) return ['Enter your password.'];
-    if (value.length < 8) return ['Your password should be at least 8 characters long.'];
-    if (!/[a-z]/.test(value)) return ['Your password should contain a lowercase letter.'];
-    if (!/[A-Z]/.test(value)) return ['Your password should contain an uppercase letter.'];
-    if (!/\d/.test(value)) return ['Your password should contain a number.'];
+    if (!value.trim()) return ["Enter your password."];
+    if (value.length < 8) return ["Your password should be at least 8 characters long."];
+    if (!/[a-z]/.test(value)) return ["Your password should contain a lowercase letter."];
+    if (!/[A-Z]/.test(value)) return ["Your password should contain an uppercase letter."];
+    if (!/\d/.test(value)) return ["Your password should contain a number."];
     return null;
   };
 
@@ -79,27 +79,27 @@ export function useSignupForm() {
 
   // ✅ Inline field validation handlers
   const handleNameChange = (value: string) => {
-    setValues((prev) => ({ ...prev, name: value }));
-    setTouched((prev) => ({ ...prev, fullName: true }));
-    setErrors((prev) => ({
+    setValues(prev => ({ ...prev, name: value }));
+    setTouched(prev => ({ ...prev, fullName: true }));
+    setErrors(prev => ({
       ...prev,
       fullNameError: validateFullName(value),
     }));
   };
 
   const handleEmailChange = (value: string) => {
-    setValues((prev) => ({ ...prev, email: value }));
-    setTouched((prev) => ({ ...prev, email: true }));
-    setErrors((prev) => ({
+    setValues(prev => ({ ...prev, email: value }));
+    setTouched(prev => ({ ...prev, email: true }));
+    setErrors(prev => ({
       ...prev,
       emailError: validateEmail(value),
     }));
   };
 
   const handlePasswordChange = (value: string) => {
-    setValues((prev) => ({ ...prev, password: value }));
-    setTouched((prev) => ({ ...prev, password: true }));
-    setErrors((prev) => ({
+    setValues(prev => ({ ...prev, password: value }));
+    setTouched(prev => ({ ...prev, password: true }));
+    setErrors(prev => ({
       ...prev,
       passwordErrors: validatePassword(value),
     }));
@@ -120,5 +120,7 @@ export function useSignupForm() {
     handlePasswordChange,
     // 🧩 Validation
     validateAll,
+    // 🧩 Allow parent to set errors (for inline server-side validation)
+    setErrors,
   };
 }

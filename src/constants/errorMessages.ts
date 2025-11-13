@@ -13,6 +13,7 @@ export const errorMessages = {
   },
   signup: {
     generalFallback: "Please fix form errors before continuing.",
-    signupFailed: "Signup failed",
+    signupFailed: "This email is already registered.",
+    emailAlreadyExist: "Account already exists. Please use a different email or sign in.",
   },
 };

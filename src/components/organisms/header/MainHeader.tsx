@@ -1,4 +1,4 @@
-import './mainHeader.scss';
+import "./mainHeader.scss";
 
 export default function MainHeader() {
   return (

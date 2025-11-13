@@ -25,10 +25,23 @@ export const typeDefs = /* GraphQL */ `
     me: User
   }
 
+  type OtpResponse {
+    success: Boolean!
+    message: String
+    otp: String
+  }
+
+  type VerificationResponse {
+    success: Boolean!
+    message: String
+  }
+
   type Mutation {
     signup(name: String, email: String!, password: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
     logout: LogoutPayload!
     verifyPassword(identifier: String!, password: String!): VerifyPasswordResponse!
+    sendOtp(email: String!): OtpResponse!
+    verifyOtp(email: String!, otp: String!): VerificationResponse!
   }
 `;

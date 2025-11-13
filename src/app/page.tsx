@@ -1,6 +1,6 @@
-import './homePage.scss';
-import DismissibleBanner from '../components/molecules/DismissibleBanner/DismissibleBanner';
-import HeroBanner from '../components/organisms/hero-banner/HeroBanner';
+import "./homePage.scss";
+import DismissibleBanner from "../components/molecules/dismissible-banner/DismissibleBanner";
+import HeroBanner from "../components/organisms/hero-banner/HeroBanner";
 
 export default function Home() {
   return (
