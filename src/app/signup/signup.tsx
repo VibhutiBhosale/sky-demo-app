@@ -39,6 +39,7 @@ export default function Signup() {
       const isValid = validateAll();
       return isValid ? {} : { general: errorMessages.signup.generalFallback };
     },
+
     request: async ({
       name,
       email,
@@ -48,16 +49,60 @@ export default function Signup() {
       email: string;
       password: string;
     }) => {
-      const data = await graphqlRequest<{ signup: { token: string } }>({
+      const data = await graphqlRequest<{ signup: { token: string; user: unknown } }>({
         query: SIGNUP_MUTATION,
         variables: { name, email, password },
       });
       return data.signup;
     },
-    onSuccess: data => {
-      if (data.token) localStorage.setItem("access_token", data.token);
-      router.push(route.verifyEmail);
+
+    onSuccess: async data => {
+      try {
+        if (data.token) localStorage.setItem("access_token", data.token);
+
+        const email = data?.user?.email;
+
+        /** ---------------------------------------------
+         *  1️⃣ OTP GRAPHQL MUTATION (not REST)
+         *  --------------------------------------------- */
+        const SEND_OTP_MUTATION = `
+          mutation SendOtp($email: String!) {
+            sendOtp(email: $email) {
+              success
+              message
+              otp
+            }
+          }
+        `;
+
+        const otpResponse = await fetch("/api/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: SEND_OTP_MUTATION,
+            variables: { email },
+          }),
+        });
+
+        const result = await otpResponse.json();
+        const otp = result?.data?.sendOtp?.otp;
+
+        /** ---------------------------------------------
+         *  2️⃣ STORE OTP + EMAIL SECURELY (NOT IN URL)
+         *  --------------------------------------------- */
+        sessionStorage.setItem("devOtp", otp);
+        sessionStorage.setItem("email", email);
+
+        /** ---------------------------------------------
+         *  3️⃣ REDIRECT TO VERIFY EMAIL PAGE
+         *  --------------------------------------------- */
+        router.push(route.verifyEmail);
+      } catch (err) {
+        console.error("OTP Error:", err);
+        setServerError("OTP sending failed. Try again.");
+      }
     },
+
     onError: err => {
       if (err.message === errorMessages.signup.signupFailed) {
         form.setErrors(prev => ({
