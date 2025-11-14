@@ -48,9 +48,6 @@ interface JwtPayload {
   email: string;
 }
 
-// ✅ Simple in-memory OTP store (replace with Redis or DB in production)
-const otpStore = new Map<string, { otp: string; expiresAt: number }>();
-
 export const resolvers = {
   Query: {
     // ✅ me query
@@ -196,62 +193,17 @@ export const resolvers = {
       }
     },
 
-    // ✅ Send OTP (for login, verification, etc.)
-    sendOtp: async (_parent: unknown, { email }: SendOtpArgs) => {
-      await dbConnect();
-
-      if (!email) {
-        throw new GraphQLError("Email is required", { extensions: { code: "BAD_USER_INPUT" } });
-      }
-
-      const user = await User.findOne({ email: email.toLowerCase() });
-      if (!user) {
-        throw new GraphQLError("No user found with this email", {
-          extensions: { code: "USER_NOT_FOUND" },
-        });
-      }
-
-      // Generate 6-digit OTP
+    // Mock OTP generator
+    async sendOtp(_: unknown, { email }: { email: string }) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
 
-      otpStore.set(email.toLowerCase(), { otp, expiresAt });
+      console.log(`Generated OTP for ${email}: ${otp}`);
 
-      // TODO: send OTP via email or SMS
-      console.log(`📩 OTP for ${email}: ${otp}`);
-
+      // You could persist OTP in DB or cache here for real implementation
       return {
         success: true,
-        message: "OTP generated and sent to your email.",
-      };
-    },
-
-    // ✅ Verify OTP
-    verifyOtp: async (_parent: unknown, { email, otp }: VerifyOtpArgs) => {
-      await dbConnect();
-
-      const entry = otpStore.get(email.toLowerCase());
-      if (!entry) {
-        throw new GraphQLError("OTP not found or expired", {
-          extensions: { code: "OTP_NOT_FOUND" },
-        });
-      }
-
-      if (Date.now() > entry.expiresAt) {
-        otpStore.delete(email.toLowerCase());
-        throw new GraphQLError("OTP expired", { extensions: { code: "OTP_EXPIRED" } });
-      }
-
-      if (entry.otp !== otp) {
-        throw new GraphQLError("Invalid OTP", { extensions: { code: "INVALID_OTP" } });
-      }
-
-      // ✅ OTP verified, invalidate it
-      otpStore.delete(email.toLowerCase());
-
-      return {
-        success: true,
-        message: "OTP verified successfully.",
+        message: "OTP sent successfully",
+        otp, // Dev only; remove later
       };
     },
   },

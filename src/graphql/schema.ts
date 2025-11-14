@@ -25,15 +25,10 @@ export const typeDefs = /* GraphQL */ `
     me: User
   }
 
-  type OtpResponse {
+  type SendOtpResponse {
     success: Boolean!
-    message: String
+    message: String!
     otp: String
-  }
-
-  type VerificationResponse {
-    success: Boolean!
-    message: String
   }
 
   type Mutation {
@@ -41,7 +36,6 @@ export const typeDefs = /* GraphQL */ `
     login(email: String!, password: String!): AuthPayload!
     logout: LogoutPayload!
     verifyPassword(identifier: String!, password: String!): VerifyPasswordResponse!
-    sendOtp(email: String!): OtpResponse!
-    verifyOtp(email: String!, otp: String!): VerificationResponse!
+    sendOtp(email: String!): SendOtpResponse!
   }
 `;

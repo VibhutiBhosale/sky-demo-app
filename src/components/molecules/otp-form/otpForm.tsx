@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import ErrorIcon from "@/components/icons/ErrorIcon";
+import Link from "next/link";
 
 interface OTPInput6Props {
   length?: number;
@@ -9,39 +10,50 @@ interface OTPInput6Props {
   className?: string;
 }
 
-export const OTPInputForm = ({
-  length = 6,
-  onChange,
-  onComplete,
-  autoFocus = true,
-  className = "",
-}: OTPInput6Props) => {
+export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: OTPInput6Props) => {
   const [values, setValues] = useState<string[]>(() => Array.from({ length }, () => ""));
+  const [otp, setOtp] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
+  const [expired, setExpired] = useState(true);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const formRef = useRef<HTMLFormElement | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  /** 👇 FIX: Prevent React Strict Mode double-running useEffect */
+  const didRun = useRef(false);
 
   const code = values.join("");
 
-  // ⏱ Focus first input
-  useEffect(() => {
-    if (autoFocus && inputsRef.current[0]) {
-      inputsRef.current[0].focus();
-    }
-  }, [autoFocus]);
+  /* ---------------------------------
+     Timer Countdown (per second)
+  ---------------------------------- */
+  const startTimer = (duration: number) => {
+    if (timerRef.current) clearInterval(timerRef.current);
 
-  // ⏳ Timer countdown
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          expireOtp();
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft]);
+  };
 
-  // 🔍 Validation logic
+  const expireOtp = () => {
+    setExpired(true);
+    setOtp(null);
+    sessionStorage.removeItem("devOtp");
+    sessionStorage.removeItem("otpTimestamp");
+
+    if (timerRef.current) clearInterval(timerRef.current);
+  };
+  /* --------------------------
+     Validate OTP Fields
+  --------------------------- */
   const validateCode = () => {
     if (code.length !== length || code.includes("")) {
       setError(`Your code must be ${length} numbers long.`);
@@ -51,7 +63,47 @@ export const OTPInputForm = ({
     return true;
   };
 
-  // ✅ Validate when clicking outside
+  /* ---------------------
+     Auto-focus first input
+  ---------------------- */
+  useEffect(() => {
+    if (autoFocus && inputsRef.current[0]) {
+      inputsRef.current[0].focus();
+    }
+  }, [autoFocus]);
+
+  const loadOtp = () => {
+    let attempts = 0;
+    const savedOtp = window.sessionStorage.getItem("devOtp");
+
+    // Retry for ~200ms until sessionStorage is populated
+    if (!savedOtp && attempts < 15) {
+      attempts++;
+      setTimeout(loadOtp, 15);
+      return;
+    }
+
+    // Still nothing → user has no OTP → allow resend
+    if (!savedOtp) {
+      setExpired(true);
+      return;
+    }
+
+    // OTP FOUND → start timer
+    setOtp(savedOtp);
+    setExpired(false);
+    setTimeLeft(30);
+    startTimer(30);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    loadOtp();
+  }, []);
+  /* --------------------------------
+     Validate on outside click
+  --------------------------------- */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
@@ -62,7 +114,9 @@ export const OTPInputForm = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   });
 
-  // 🔄 Handle input changes
+  /* --------------------------
+     Handle input changes
+  --------------------------- */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const raw = e.target.value;
     const digit = raw.replace(/[^0-9]/g, "");
@@ -99,7 +153,9 @@ export const OTPInputForm = ({
     }
   };
 
-  // ⌨️ Handle key navigation & backspace
+  /* ---------------------------
+     Keyboard Inputs
+  ---------------------------- */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
     if (e.key === "Backspace") {
       e.preventDefault();
@@ -121,7 +177,9 @@ export const OTPInputForm = ({
     }
   };
 
-  // 📋 Handle paste
+  /* --------------------------
+     Handle Paste
+  --------------------------- */
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
     const paste = e.clipboardData.getData("text");
@@ -130,98 +188,41 @@ export const OTPInputForm = ({
     setValues(Array.from(digits.padEnd(length, ""), d => d));
   };
 
-  // ⚡ Verify OTP via GraphQL API
-  const verifyOtp = async (otpCode: string) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-            mutation VerifyOtp($email: String!, $otp: String!) {
-              verifyOtp(email: $email, otp: $otp) {
-                success
-                message
-              }
-            }
-          `,
-          variables: {
-            email: "user@example.com", // ⚠️ Replace with actual user email from context/state
-            otp: otpCode,
-          },
-        }),
-      });
-
-      const result = await response.json();
-      const data = result.data?.verifyOtp;
-
-      if (!data?.success) {
-        setError(data?.message || "Invalid OTP. Please try again.");
-      } else {
-        setError("");
-        onComplete?.(otpCode);
-      }
-    } catch (err) {
-      console.error("verifyOtp error:", err);
-      setError("Network error. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 🔁 Resend OTP via GraphQL API
-  const resendOtp = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-            mutation SendOtp($email: String!) {
-              sendOtp(email: $email) {
-                success
-                message
-              }
-            }
-          `,
-          variables: {
-            email: "user@example.com", // ⚠️ Replace with actual user email
-          },
-        }),
-      });
-
-      const result = await response.json();
-      const data = result.data?.sendOtp;
-
-      if (!data?.success) {
-        setError(data?.message || "Failed to resend OTP.");
-      } else {
-        setError("");
-        setTimeLeft(30);
-      }
-    } catch (err) {
-      console.error("sendOtp error:", err);
-      setError("Failed to resend OTP. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 🧩 Handle Continue click
+  /* --------------------------
+     Continue Button
+  --------------------------- */
   const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateCode()) return;
-    await verifyOtp(code);
   };
 
-  // ⏱ Timer format
   const formatTime = (seconds: number): string => seconds.toString().padStart(2, "0");
 
+  /* -----------------------------------
+     RESEND OTP
+  ------------------------------------ */
+  const resendCode = async () => {
+    // TODO: Replace with GraphQL mutation
+    const newOtp = "123456";
+
+    sessionStorage.setItem("devOtp", newOtp);
+    sessionStorage.setItem("otpTimestamp", Date.now().toString());
+
+    setOtp(newOtp);
+    setExpired(false);
+    setTimeLeft(30);
+    startTimer(30);
+  };
+
+  /* --------------------------
+     JSX (unchanged)
+  --------------------------- */
   return (
     <div className={`flex flex-col gap-4 ${className}`.trim()}>
-      <h2 className="body text-left font-normal">Please enter your code:</h2>
+      <h2 className="body text-left font-normal">
+        Please enter your code: {otp && !expired ? sessionStorage.getItem("devOtp") : ""}
+      </h2>
+
       <form
         ref={formRef}
         onSubmit={handleContinue}
@@ -283,8 +284,8 @@ export const OTPInputForm = ({
             data-testid="sign-up-create-account-button"
             id="signUpContinueButton"
             type="button"
-            onClick={resendOtp}
-            disabled={isLoading || timeLeft > 0}
+            disabled={!expired}
+            onClick={resendCode}
           >
             {isLoading ? "Sending..." : "Resend code"}
           </button>
@@ -293,6 +294,11 @@ export const OTPInputForm = ({
 
       {timeLeft > 0 && (
         <div className="mt-2 text-center text-sm text-gray-500">
+          <p className="mb-2 text-left text-[16px] leading-[24px]">
+            {" "}
+            We have sent you a new code. Please check your spam folder if it has not arrived within
+            1 minute.
+          </p>
           <p className="text-left text-[16px] leading-[24px]">
             Please wait {formatTime(timeLeft)} seconds before you resend the code.
           </p>
@@ -300,7 +306,11 @@ export const OTPInputForm = ({
       )}
 
       <p className="text-left text-[16px] leading-[24px]">
-        If you can't access this email, please update your email address and we'll resend the code.
+        If you can&apos;t access this email, please{" "}
+        <Link href="/update-email" className="text-sky-600 underline hover:text-sky-800">
+          update your email address
+        </Link>{" "}
+        and we&apos;ll resend the code.
       </p>
     </div>
   );

@@ -53,7 +53,7 @@
         }
         .input-wrapper {
           position: relative;
-          width: 95%;
+          width: 100%;
           .input {
             background: var(--color-white);
             border: 1px solid var(--color-grey50);
@@ -107,6 +107,38 @@
             top: 0;
             z-index: 1;
           }
+
+          .MuiFormControl-root.MuiTextField-root {
+            width: 100%;
+            input {
+              background: var(--color-white);
+              //border: 1px solid var(--color-grey50);
+              //border-radius: 4px;
+              color: var(--color-foreground);
+              cursor: pointer;
+              flex: 1 1 auto;
+              font: inherit;
+              height: 28px;
+              outline: none;
+              padding: 12px 16px;
+              position: relative;
+              width: inherit;
+            }
+            .MuiFormLabel-root.MuiInputLabel-root.Mui-focused {
+              //color: #909090;
+              //font-size: 16px;;
+            }
+            .MuiInputBase-root.MuiOutlinedInput-root.Mui-focused {
+              fieldset {
+                border: 1px solid var(--color-grey50);
+                legend {
+                  background: #fff;
+                  border-radius: 3px;
+                  outline: none;
+                }
+              }
+            }
+          }
         }
         .error-message-container {
           align-items: start;
@@ -147,6 +179,12 @@
           border-width: 2px;
           border-style: solid;
           color: var(--color-primary-regular);
+        }
+        .btn:disabled {
+          border-color: transparent;
+          cursor: not-allowed;
+          color: #fff;
+          background-color: #b4b4b4;
         }
         .btn.full-width {
           width: 100%;
@@ -341,6 +379,12 @@
       }
     }
   }
+  .page-content.update-email {
+    .MuiFormLabel-root.MuiInputLabel-root {
+      width: 100%;
+    }
+  }
+
   .change-email-link-wrapper {
     display: grid;
     justify-content: center;
