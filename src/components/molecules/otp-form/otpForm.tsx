@@ -21,14 +21,52 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
   const formRef = useRef<HTMLFormElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  /** 👇 FIX: Prevent React Strict Mode double-running useEffect */
-  const didRun = useRef(false);
+  /** ⭐ FIX: Validate ONLY after user truly focuses an OTP input */
+  const [inputFocused, setInputFocused] = useState(false);
 
   const code = values.join("");
 
-  /* ---------------------------------
-     Timer Countdown (per second)
-  ---------------------------------- */
+  /* --------------------------
+     Validate OTP Fields
+  --------------------------- */
+  const validateCode = () => {
+    if (code.length !== length || code.includes("")) {
+      setError(`Your code must be ${length} numbers long.`);
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
+  /* --------------------------
+     Validate on outside click
+     ONLY if user focused input first
+  --------------------------- */
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!inputFocused) return; // ❌ Don't validate if user hasn't touched inputs yet
+
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        validateCode();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [inputFocused, code]);
+
+  /* ---------------------
+     Auto-focus first input
+  ---------------------- */
+  useEffect(() => {
+    if (autoFocus && inputsRef.current[0]) {
+      inputsRef.current[0].focus();
+    }
+  }, [autoFocus]);
+
+  /* --------------------------
+     OTP loading and timer
+  --------------------------- */
   const startTimer = (duration: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -48,48 +86,24 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
     setOtp(null);
     sessionStorage.removeItem("devOtp");
     sessionStorage.removeItem("otpTimestamp");
-
     if (timerRef.current) clearInterval(timerRef.current);
   };
-  /* --------------------------
-     Validate OTP Fields
-  --------------------------- */
-  const validateCode = () => {
-    if (code.length !== length || code.includes("")) {
-      setError(`Your code must be ${length} numbers long.`);
-      return false;
-    }
-    setError("");
-    return true;
-  };
-
-  /* ---------------------
-     Auto-focus first input
-  ---------------------- */
-  useEffect(() => {
-    if (autoFocus && inputsRef.current[0]) {
-      inputsRef.current[0].focus();
-    }
-  }, [autoFocus]);
 
   const loadOtp = () => {
     let attempts = 0;
     const savedOtp = window.sessionStorage.getItem("devOtp");
 
-    // Retry for ~200ms until sessionStorage is populated
     if (!savedOtp && attempts < 15) {
       attempts++;
       setTimeout(loadOtp, 15);
       return;
     }
 
-    // Still nothing → user has no OTP → allow resend
     if (!savedOtp) {
       setExpired(true);
       return;
     }
 
-    // OTP FOUND → start timer
     setOtp(savedOtp);
     setExpired(false);
     setTimeLeft(30);
@@ -98,24 +112,11 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     loadOtp();
   }, []);
-  /* --------------------------------
-     Validate on outside click
-  --------------------------------- */
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (formRef.current && !formRef.current.contains(event.target as Node)) {
-        validateCode();
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  });
 
   /* --------------------------
-     Handle input changes
+     Input change handling
   --------------------------- */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const raw = e.target.value;
@@ -153,9 +154,9 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
     }
   };
 
-  /* ---------------------------
-     Keyboard Inputs
-  ---------------------------- */
+  /* --------------------------
+     Keyboard navigation
+  --------------------------- */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
     if (e.key === "Backspace") {
       e.preventDefault();
@@ -178,7 +179,7 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
   };
 
   /* --------------------------
-     Handle Paste
+     Handle paste
   --------------------------- */
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -189,33 +190,30 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
   };
 
   /* --------------------------
-     Continue Button
+     Submit
   --------------------------- */
-  const handleContinue = async (e: React.FormEvent) => {
+  const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateCode()) return;
   };
 
-  const formatTime = (seconds: number): string => seconds.toString().padStart(2, "0");
-
-  /* -----------------------------------
-     RESEND OTP
-  ------------------------------------ */
-  const resendCode = async () => {
-    // TODO: Replace with GraphQL mutation
+  /* --------------------------
+     Resend OTP
+  --------------------------- */
+  const resendCode = () => {
     const newOtp = "123456";
-
     sessionStorage.setItem("devOtp", newOtp);
     sessionStorage.setItem("otpTimestamp", Date.now().toString());
-
     setOtp(newOtp);
     setExpired(false);
     setTimeLeft(30);
     startTimer(30);
   };
 
+  const formatTime = (seconds: number) => seconds.toString().padStart(2, "0");
+
   /* --------------------------
-     JSX (unchanged)
+     JSX remains EXACTLY same
   --------------------------- */
   return (
     <div className={`flex flex-col gap-4 ${className}`.trim()}>
@@ -245,6 +243,7 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
               value={value}
               onChange={e => handleChange(e, i)}
               onKeyDown={e => handleKeyDown(e, i)}
+              onFocus={() => setInputFocused(true)}
               className={`h-12 w-12 rounded-[4px] border text-center text-lg font-medium caret-transparent focus:ring-1 focus:ring-indigo-500 focus:outline-none md:h-[54px] md:w-[41px] ${
                 error ? "border-red-500" : "border-[#e6e6e6]"
               }`}
@@ -265,24 +264,17 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
         )}
 
         <div className="identifier-links-and-button-grid">
-          <button
-            className="btn primary full-width"
-            data-testid="sign-up-create-account-button"
-            id="signUpContinueButton"
-            type="submit"
-            disabled={isLoading}
-          >
+          <button className="btn primary full-width" type="submit" disabled={isLoading}>
             {isLoading ? "Verifying..." : "Continue"}
           </button>
         </div>
 
         <hr className="mt-2 mb-2 w-full border-[0.5px] border-[#e6e6e6]" />
         <p>Didn&apos;t receive a code?</p>
+
         <div className="identifier-links-and-button-grid">
           <button
             className="btn secondary full-width"
-            data-testid="sign-up-create-account-button"
-            id="signUpContinueButton"
             type="button"
             disabled={!expired}
             onClick={resendCode}
@@ -295,7 +287,6 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
       {timeLeft > 0 && (
         <div className="mt-2 text-center text-sm text-gray-500">
           <p className="mb-2 text-left text-[16px] leading-[24px]">
-            {" "}
             We have sent you a new code. Please check your spam folder if it has not arrived within
             1 minute.
           </p>

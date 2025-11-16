@@ -1,9 +1,39 @@
 "use client";
+
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
 import { usePathname } from "next/navigation";
 import AuthHeader from "../components/organisms/header/AuthHeader";
 import MainHeader from "../components/organisms/header/MainHeader";
 import "./globals.css";
 import "../styles/footer.scss";
+
+const theme = createTheme({
+  typography: {
+    fontFamily: `"Sky Text", sans-serif`,
+  },
+
+  components: {
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          fontFamily: `""Sky Text", sans-serif`,
+        },
+        input: {
+          fontFamily: `""Sky Text", sans-serif`,
+        },
+      },
+    },
+
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          fontFamily: `""Sky Text", sans-serif`,
+        },
+      },
+    },
+  },
+});
 
 export default function RootLayout({
   children,
@@ -25,7 +55,7 @@ export default function RootLayout({
         {isAuthPage ? <AuthHeader /> : <MainHeader />}
         <main className="main-content">
           {/* Main content goes here */}
-          {children}
+          <ThemeProvider theme={theme}>{children}</ThemeProvider>
         </main>
 
         <footer data-test-id="footer" className="footer">

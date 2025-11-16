@@ -9,6 +9,7 @@ import {
   getRefreshCookie,
   clearRefreshCookie,
 } from "../lib/auth";
+import { UpdateSignupEmailArgs } from "@/types/types";
 
 // ✅ Define shared context and argument types
 interface GraphQLContext {
@@ -205,6 +206,56 @@ export const resolvers = {
         message: "OTP sent successfully",
         otp, // Dev only; remove later
       };
+    },
+
+    updateSignupEmail: async (_parent: unknown, { oldEmail, newEmail }: UpdateSignupEmailArgs) => {
+      try {
+        console.log("➡️ updateSignupEmail resolver called", { oldEmail, newEmail });
+
+        // 1️⃣ ensure DB is connected
+        await dbConnect();
+
+        // 2️⃣ Look for user with the old email
+        const existingUser = await User.findOne({ email: oldEmail });
+
+        if (!existingUser) {
+          console.log("❌ oldEmail not found:", oldEmail);
+          return {
+            success: false,
+            message: "Original email not found. Restart signup process.",
+          };
+        }
+
+        // 3️⃣ Check if new email already exists (duplicate prevention)
+        const userWithNewEmail = await User.findOne({ email: newEmail });
+
+        if (userWithNewEmail) {
+          console.log("❌ newEmail already exists:", newEmail);
+          return {
+            success: false,
+            message: "Account already exists. Please use a different email or sign in.",
+          };
+        }
+
+        // 4️⃣ Update email in DB
+        console.log("🔄 Updating email...");
+        existingUser.email = newEmail;
+        await existingUser.save();
+
+        console.log("✅ Email update successful!");
+
+        // 5️⃣ Return success response
+        return {
+          success: true,
+          message: "Email updated successfully.",
+        };
+      } catch (err) {
+        console.error("🔥 updateSignupEmail error:", err);
+        return {
+          success: false,
+          message: "Failed to update email.",
+        };
+      }
     },
   },
 };
