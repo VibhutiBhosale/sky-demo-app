@@ -1,14 +1,15 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import TextField from "@mui/material/TextField";
 import ErrorIcon from "@/components/icons/ErrorIcon";
 import { useUpdateEmailForm } from "@/hooks/useUpdateEmailForm";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { graphqlRequest } from "@/lib/apiClient";
 import { route, errorMessages } from "@/constants";
-import { useRouter } from "next/navigation";
+import { UPDATE_SIGNUP_EMAIL_MUTATION, SEND_OTP_MUTATION } from "@/graphql/mutations/auth";
 
 export default function UpdateEmail() {
   const router = useRouter();
@@ -16,14 +17,7 @@ export default function UpdateEmail() {
   const form = useUpdateEmailForm();
   const [shrinkLabel1, setShrinkLabel1] = useState(false);
   const [shrinkLabel2, setShrinkLabel2] = useState(false);
-  const UPDATE_SIGNUP_EMAIL_MUTATION = `
-  mutation UpdateSignupEmail($oldEmail: String!, $newEmail: String!) {
-    updateSignupEmail(oldEmail: $oldEmail, newEmail: $newEmail) {
-      success
-      message
-    }
-  }
-`;
+
   const {
     email1,
     email2,
@@ -34,7 +28,6 @@ export default function UpdateEmail() {
     handleEmail1Change,
     handleEmail2Change,
     validateAll,
-    setErrors,
   } = form;
 
   const oldEmail = sessionStorage.getItem("email");
@@ -60,45 +53,28 @@ export default function UpdateEmail() {
     },
 
     onSuccess: async data => {
-      debugger;
       if (!data?.success) {
         setServerError(data.message);
         return;
       }
 
-      /** 1️⃣ SEND NEW OTP **/
-      const SEND_OTP_MUTATION = `
-        mutation SendOtp($email: String!) {
-          sendOtp(email: $email) {
-            success
-            message
-            otp
-          }
-        }
-      `;
-
-      const otpResponse = await fetch("/api/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: SEND_OTP_MUTATION,
-          variables: { email: email1 },
-        }),
+      const otpResponse = await graphqlRequest<{
+        sendOtp: { success: boolean; message: string; otp: string };
+      }>({
+        query: SEND_OTP_MUTATION,
+        variables: { email: email1 },
       });
 
-      const result = await otpResponse.json();
-      const otp = result?.data?.sendOtp?.otp;
+      const otp = otpResponse.sendOtp.otp;
 
-      /** 2️⃣ STORE NEW EMAIL + OTP **/
+      // store new email + otp
       sessionStorage.setItem("email", email1);
       sessionStorage.setItem("devOtp", otp);
 
-      /** 3️⃣ REDIRECT BACK TO OTP PAGE **/
       router.push(route.verifyEmail);
     },
 
     onError: err => {
-      console.log(err.message);
       if (err.message === errorMessages.signup.signupFailed) {
         form.setErrors(prev => ({
           ...prev,
@@ -111,6 +87,7 @@ export default function UpdateEmail() {
       setServerError(err.message);
     },
   });
+
   return (
     <div className="page-content update-email">
       <div className="card-container">
@@ -127,7 +104,6 @@ export default function UpdateEmail() {
                 }}
               >
                 <div className="user-details-input-fields-grid">
-                  {/* EMAIL 1 */}
                   <div className="text-input-container type-email label-in-border">
                     <div className="input-wrapper">
                       <TextField
@@ -136,12 +112,12 @@ export default function UpdateEmail() {
                         value={email1}
                         onChange={e => handleEmail1Change(e.target.value)}
                         onBlur={() => handleEmail1Change(email1)}
-                        onFocus={() => setShrinkLabel1(true)} // ⭐ float permanently after first focus
+                        onFocus={() => setShrinkLabel1(true)}
                         error={Boolean(email1Error && touchedEmail1)}
                         fullWidth
                         slotProps={{
                           inputLabel: {
-                            shrink: shrinkLabel1, // ⭐ replace deprecated InputLabelProps.shrink
+                            shrink: shrinkLabel1,
                           },
                         }}
                         sx={{
@@ -160,7 +136,6 @@ export default function UpdateEmail() {
                     )}
                   </div>
 
-                  {/* EMAIL 2 */}
                   <div className="text-input-container type-email label-in-border">
                     <div className="input-wrapper">
                       <TextField
@@ -194,7 +169,6 @@ export default function UpdateEmail() {
                   </div>
                 </div>
 
-                {/* SERVER ERROR */}
                 {serverError && <div className="text-sm text-red-700">{serverError}</div>}
 
                 <div className="identifier-links-and-button-grid">

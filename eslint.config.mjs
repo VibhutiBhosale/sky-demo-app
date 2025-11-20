@@ -1,4 +1,3 @@
-// eslint.config.mjs
 import { defineConfig, globalIgnores } from 'eslint/config';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
@@ -33,7 +32,7 @@ export default defineConfig([
     },
 
     rules: {
-      // ✅ Prettier integration
+      // Prettier integration
       'prettier/prettier': [
         'error',
         {
@@ -47,8 +46,8 @@ export default defineConfig([
           "endOfLine": "auto",
         },
       ],
-
-      // 🧠 General improvements
+      //"complexity": ["error", { "max": 12 }],
+      // General improvements
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'react/react-in-jsx-scope': 'off', // Not needed for Next.js
       'react/prop-types': 'off', // Using TypeScript types
@@ -57,7 +56,7 @@ export default defineConfig([
     },
   },
 
-  // 🔕 Ignored files and folders
+  //Ignored files and folders
   globalIgnores([
     '.next/**',
     'out/**',

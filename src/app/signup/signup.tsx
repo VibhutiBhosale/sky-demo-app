@@ -2,12 +2,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
 import PasswordToggleOnIcon from "@/components/icons/PasswordToggleOnIcon";
 import PasswordToggleOffIcon from "@/components/icons/PasswordToggleOffIcon";
 import ErrorIcon from "@/components/icons/ErrorIcon";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { useSignupForm } from "@/hooks/useSignupForm";
-import { SIGNUP_MUTATION } from "@/graphql/mutations/auth";
+import { SIGNUP_MUTATION, SEND_OTP_MUTATION } from "@/graphql/mutations/auth";
 import { graphqlRequest } from "@/lib/apiClient";
 import { errorMessages, labels, route } from "@/constants";
 
@@ -59,43 +60,21 @@ export default function Signup() {
     onSuccess: async data => {
       try {
         if (data.token) localStorage.setItem("access_token", data.token);
-
         const email = data?.user?.email;
 
-        /** ---------------------------------------------
-         *  1️⃣ OTP GRAPHQL MUTATION (not REST)
-         *  --------------------------------------------- */
-        const SEND_OTP_MUTATION = `
-          mutation SendOtp($email: String!) {
-            sendOtp(email: $email) {
-              success
-              message
-              otp
-            }
-          }
-        `;
-
-        const otpResponse = await fetch("/api/graphql", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: SEND_OTP_MUTATION,
-            variables: { email },
-          }),
+        const otpData = await graphqlRequest<{
+          sendOtp: { success: boolean; message: string; otp: string };
+        }>({
+          query: SEND_OTP_MUTATION,
+          variables: { email },
         });
 
-        const result = await otpResponse.json();
-        const otp = result?.data?.sendOtp?.otp;
+        const otp = otpData.sendOtp.otp;
 
-        /** ---------------------------------------------
-         *  2️⃣ STORE OTP + EMAIL SECURELY (NOT IN URL)
-         *  --------------------------------------------- */
+        // STORE OTP + EMAIL SECURELY (NOT IN URL)
         sessionStorage.setItem("devOtp", otp);
         sessionStorage.setItem("email", email);
 
-        /** ---------------------------------------------
-         *  3️⃣ REDIRECT TO VERIFY EMAIL PAGE
-         *  --------------------------------------------- */
         router.push(route.verifyEmail);
       } catch (err) {
         console.error("OTP Error:", err);
@@ -146,7 +125,6 @@ export default function Signup() {
                         className={`input touched ${
                           fullNameError && touchedFullName ? "input-error" : ""
                         }`}
-                        data-testid="sign-up-input-name"
                         id="fullName"
                         name="fullName"
                         required
@@ -175,7 +153,6 @@ export default function Signup() {
                         className={`input touched ${
                           emailError && touchedEmail ? "input-error" : ""
                         }`}
-                        data-testid="sign-up-input-emailL"
                         id="email"
                         name="email"
                         required
@@ -203,7 +180,6 @@ export default function Signup() {
                         className={`input touched initially-password ${
                           passwordErrors && touchedPassword ? "input-error" : ""
                         }`}
-                        data-testid="sign-up-input-password"
                         id="password"
                         name="password"
                         required
@@ -222,9 +198,6 @@ export default function Signup() {
                       <button
                         className="toggle-field-type"
                         type="button"
-                        aria-label="Hide password in text field"
-                        data-testid="sign-up-input-password-toggle"
-                        id="passwordToggle"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <PasswordToggleOffIcon /> : <PasswordToggleOnIcon />}
@@ -255,62 +228,38 @@ export default function Signup() {
                       <input
                         className="checkbox"
                         type="checkbox"
-                        id="marketingOption"
-                        data-testid="marketingOption"
                         checked={marketingOptIn}
                         onChange={e => setMarketingOptIn(e.target.checked)}
                       />
                       <span className="pseudo-focus"></span>
                     </div>
                     <div className="checkbox-label-wrapper">
-                      <label
-                        className="checkbox-label"
-                        htmlFor="marketingOption"
-                        data-testid="marketingOption_label"
-                        id="marketingOption_label"
-                      >
+                      <label className="checkbox-label">
                         {labels.signup.consentText}
                         <br />
-                        <a
-                          className="privacy-link"
-                          href="https://www.sky.com/help/articles/sky-privacy-and-cookies-notice?hideMasthead=true"
-                          target="_blank"
-                        >
+                        <a className="privacy-link" href="#" target="_blank">
                           {labels.signup.privacycontentLink}
                         </a>
                       </label>
                     </div>
                   </div>
                 </div>
-                <p
-                  data-testid="sign-up-default-terms-and-condition"
-                  className="body-sm text ta-left user-details-external-links dark"
-                >
+                <p className="user-details-external-links text-base leading-6">
                   {labels.signup.confirmText} <br />
-                  <a
-                    href="https://www.sky.com/help/articles/sky-terms-and-conditions"
-                    data-testid="accept-terms-and-condition"
-                    target="_blank"
-                    className="nowrap"
-                  >
+                  <a href="#" target="_blank" className="underline">
                     {labels.signup.skyTermText}
                   </a>
                 </p>
                 {serverError && <div className="mb-2 text-sm text-red-700">{serverError}</div>}
                 <div className="user-details-button-and-link">
-                  <button
-                    className="btn primary full-width"
-                    data-testid="sign-up-create-account-button"
-                    id="signUpContinueButton"
-                    type="submit"
-                  >
+                  <button className="btn primary full-width" type="submit">
                     {loading ? "Creating..." : "Create account"}
                   </button>
                   <div className="user-details-sign-in-wrap">
                     <span className="link-container inline">
                       <Link
                         data-testid="sign-up-link-to-sign-in"
-                        href="/"
+                        href="/login"
                         className="link body dark active"
                         aria-current="page"
                       >

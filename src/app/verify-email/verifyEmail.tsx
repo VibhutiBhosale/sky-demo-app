@@ -1,10 +1,9 @@
 "use client";
-import { errorMessages, labels, route } from "@/constants";
+import { labels } from "@/constants";
 import OTPInputForm from "@/components/molecules/otp-form/otpForm";
 
 export default function VerifyEmail() {
-  //const storedIdentifier = sessionStorage.getItem("login_identifier");
-  const storedIdentifier = "vibhuti.2008@gmail.com";
+  const storedIdentifier = sessionStorage.getItem("email");
   return (
     <div className="page-content otp-form">
       <div className="card-container">

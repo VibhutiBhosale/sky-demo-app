@@ -1,13 +1,18 @@
 // tailwind.config.js
 module.exports = {
   content: [
-    "./app/**/*.{js,ts,jsx,tsx}", // for Next.js app router
-    "./pages/**/*.{js,ts,jsx,tsx}", // for pages router
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
-    "./src/**/*.{js,ts,jsx,tsx}", // if using src structure
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        800: "800px", // MUST be in quotes
+        960: "960px",
+      },
+    },
   },
   plugins: [],
 };

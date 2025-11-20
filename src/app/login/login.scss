@@ -53,7 +53,7 @@
         }
         .input-wrapper {
           position: relative;
-          width: 100%;
+          width: 95%;
           .input {
             background: var(--color-white);
             border: 1px solid var(--color-grey50);
@@ -285,7 +285,7 @@
     display: grid;
     grid-gap: var(--spacing-6);
     .password-hints {
-      margin-top: 20px;
+      margin-top: 10px;
       max-height: 9999px;
 
       display: grid;
@@ -339,7 +339,8 @@
       }
       .checkbox-label-wrapper {
         padding-top: 3px;
-
+        font-size: 16px;
+        line-height: 24px;
         .checkbox-label {
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
@@ -354,7 +355,7 @@
     .user-details-button-and-link {
       display: grid;
       grid-gap: var(--spacing-4);
-      padding-top: var(--spacing-3);
+      //padding-top: var(--spacing-3);
     }
   }
 }

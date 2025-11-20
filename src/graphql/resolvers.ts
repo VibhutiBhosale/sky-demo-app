@@ -1,4 +1,5 @@
 import User from "../models/User";
+import Otp from "../models/Otp";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dbConnect from "../lib/mongodb";
@@ -196,15 +197,18 @@ export const resolvers = {
 
     // Mock OTP generator
     async sendOtp(_: unknown, { email }: { email: string }) {
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      await dbConnect();
 
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
       console.log(`Generated OTP for ${email}: ${otp}`);
 
-      // You could persist OTP in DB or cache here for real implementation
+      // Replace existing OTP if user requests resend
+      await Otp.findOneAndUpdate({ email }, { otp, createdAt: new Date() }, { upsert: true });
+
       return {
         success: true,
         message: "OTP sent successfully",
-        otp, // Dev only; remove later
+        otp, // DEV ONLY
       };
     },
 
@@ -256,6 +260,34 @@ export const resolvers = {
           message: "Failed to update email.",
         };
       }
+    },
+
+    verifyOtp: async (_: unknown, { email, otp }: { email: string; otp: string }) => {
+      await dbConnect();
+
+      const record = await Otp.findOne({ email });
+
+      if (!record) {
+        return {
+          success: false,
+          message: "OTP expired or not found.",
+        };
+      }
+
+      if (record.otp !== otp) {
+        return {
+          success: false,
+          message: "Invalid OTP.",
+        };
+      }
+
+      // OTP verified — delete it so it cannot be reused
+      await Otp.deleteOne({ email });
+
+      return {
+        success: true,
+        message: "OTP verified successfully",
+      };
     },
   },
 };

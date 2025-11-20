@@ -43,5 +43,6 @@ export const typeDefs = /* GraphQL */ `
     verifyPassword(identifier: String!, password: String!): VerifyPasswordResponse!
     sendOtp(email: String!): SendOtpResponse!
     updateSignupEmail(oldEmail: String!, newEmail: String!): UpdateEmailResponse!
+    verifyOtp(email: String!, otp: String!): SendOtpResponse!
   }
 `;
