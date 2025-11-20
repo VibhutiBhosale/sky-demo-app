@@ -31,11 +31,18 @@ export const typeDefs = /* GraphQL */ `
     otp: String
   }
 
+  type UpdateEmailResponse {
+    success: Boolean!
+    message: String!
+  }
+
   type Mutation {
     signup(name: String, email: String!, password: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
     logout: LogoutPayload!
     verifyPassword(identifier: String!, password: String!): VerifyPasswordResponse!
     sendOtp(email: String!): SendOtpResponse!
+    updateSignupEmail(oldEmail: String!, newEmail: String!): UpdateEmailResponse!
+    verifyOtp(email: String!, otp: String!): SendOtpResponse!
   }
 `;

@@ -1,9 +1,39 @@
 "use client";
+
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
 import { usePathname } from "next/navigation";
 import AuthHeader from "../components/organisms/header/AuthHeader";
-import MainHeader from "../components/organisms/header/MainHeader";
+import Header from "../components/organisms/header/Header";
 import "./globals.css";
 import "../styles/footer.scss";
+
+const theme = createTheme({
+  typography: {
+    fontFamily: `"Sky Text", sans-serif`,
+  },
+
+  components: {
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          fontFamily: `""Sky Text", sans-serif`,
+        },
+        input: {
+          fontFamily: `""Sky Text", sans-serif`,
+        },
+      },
+    },
+
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          fontFamily: `""Sky Text", sans-serif`,
+        },
+      },
+    },
+  },
+});
 
 export default function RootLayout({
   children,
@@ -22,10 +52,10 @@ export default function RootLayout({
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" type="image/ico" href="https://id.sky.com/favicon.ico"></link>
       <body className={`antialiased`}>
-        {isAuthPage ? <AuthHeader /> : <MainHeader />}
+        {isAuthPage ? <AuthHeader /> : <Header />}
         <main className="main-content">
           {/* Main content goes here */}
-          {children}
+          <ThemeProvider theme={theme}>{children}</ThemeProvider>
         </main>
 
         <footer data-test-id="footer" className="footer">

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import ErrorIcon from "@/components/icons/ErrorIcon";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { restRequest } from "@/lib/apiClient";
@@ -29,7 +30,7 @@ export default function LoginPage() {
         const message =
           data?.error?.message || data?.message || errorMessages.login.invalidIdentifier;
         setErrors({ email: message });
-        return null; // stop here
+        return null;
       }
       sessionStorage.setItem("login_identifier", identifier);
       router.push(route.enterPassword);

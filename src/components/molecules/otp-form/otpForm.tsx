@@ -1,6 +1,12 @@
+"use client";
 import React, { useEffect, useRef, useState } from "react";
-import ErrorIcon from "@/components/icons/ErrorIcon";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { graphqlRequest } from "@/lib/apiClient";
+import ErrorIcon from "@/components/icons/ErrorIcon";
+import { route } from "@/constants";
+import { VERIFY_OTP, RESEND_OTP } from "@/graphql/mutations/auth";
 
 interface OTPInput6Props {
   length?: number;
@@ -17,21 +23,54 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
   const [timeLeft, setTimeLeft] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [expired, setExpired] = useState(true);
+  const router = useRouter();
+
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const formRef = useRef<HTMLFormElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  /** 👇 FIX: Prevent React Strict Mode double-running useEffect */
-  const didRun = useRef(false);
+  const loadAttempts = useRef(0);
+  const [inputFocused, setInputFocused] = useState(false);
 
   const code = values.join("");
 
-  /* ---------------------------------
-     Timer Countdown (per second)
-  ---------------------------------- */
+  const allFilled = (arr: string[]) => arr.every(v => v !== "" && v !== null && v !== undefined);
+
+  const validateCode = () => {
+    if (code.length !== length || !allFilled(values)) {
+      setError(`Your code must be ${length} numbers long.`);
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
+  useEffect(() => {
+    if (error && code.length === length && allFilled(values)) {
+      setError(""); // auto clear
+    }
+  }, [code, error, length, values]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!inputFocused) return;
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        validateCode();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [inputFocused, code, values]);
+
+  useEffect(() => {
+    if (autoFocus && inputsRef.current[0]) {
+      inputsRef.current[0].focus();
+    }
+  }, [autoFocus]);
+
   const startTimer = (duration: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
 
+    setTimeLeft(duration);
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -47,76 +86,41 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
     setExpired(true);
     setOtp(null);
     sessionStorage.removeItem("devOtp");
-    sessionStorage.removeItem("otpTimestamp");
-
     if (timerRef.current) clearInterval(timerRef.current);
   };
-  /* --------------------------
-     Validate OTP Fields
-  --------------------------- */
-  const validateCode = () => {
-    if (code.length !== length || code.includes("")) {
-      setError(`Your code must be ${length} numbers long.`);
-      return false;
-    }
-    setError("");
-    return true;
+
+  const fillInputsFromOtp = (otpValue: string) => {
+    const digits = otpValue.slice(0, length).split("");
+    const filled = Array.from({ length }, (_, i) => digits[i] ?? "");
+    setValues(filled);
   };
 
-  /* ---------------------
-     Auto-focus first input
-  ---------------------- */
-  useEffect(() => {
-    if (autoFocus && inputsRef.current[0]) {
-      inputsRef.current[0].focus();
-    }
-  }, [autoFocus]);
-
   const loadOtp = () => {
-    let attempts = 0;
-    const savedOtp = window.sessionStorage.getItem("devOtp");
+    const savedOtp = typeof window !== "undefined" ? window.sessionStorage.getItem("devOtp") : null;
 
-    // Retry for ~200ms until sessionStorage is populated
-    if (!savedOtp && attempts < 15) {
-      attempts++;
-      setTimeout(loadOtp, 15);
+    if (!savedOtp && loadAttempts.current < 20) {
+      loadAttempts.current++;
+      setTimeout(loadOtp, 30);
       return;
     }
 
-    // Still nothing → user has no OTP → allow resend
     if (!savedOtp) {
       setExpired(true);
       return;
     }
 
-    // OTP FOUND → start timer
+    // OTP found → start fresh 30s timer and fill inputs for dev
     setOtp(savedOtp);
+    fillInputsFromOtp(savedOtp);
     setExpired(false);
-    setTimeLeft(30);
     startTimer(30);
   };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     loadOtp();
   }, []);
-  /* --------------------------------
-     Validate on outside click
-  --------------------------------- */
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (formRef.current && !formRef.current.contains(event.target as Node)) {
-        validateCode();
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  });
 
-  /* --------------------------
-     Handle input changes
-  --------------------------- */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const raw = e.target.value;
     const digit = raw.replace(/[^0-9]/g, "");
@@ -153,9 +157,6 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
     }
   };
 
-  /* ---------------------------
-     Keyboard Inputs
-  ---------------------------- */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
     if (e.key === "Backspace") {
       e.preventDefault();
@@ -177,9 +178,6 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
     }
   };
 
-  /* --------------------------
-     Handle Paste
-  --------------------------- */
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
     const paste = e.clipboardData.getData("text");
@@ -188,35 +186,68 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
     setValues(Array.from(digits.padEnd(length, ""), d => d));
   };
 
-  /* --------------------------
-     Continue Button
-  --------------------------- */
   const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateCode()) return;
+
+    try {
+      setIsLoading(true);
+
+      const email = sessionStorage.getItem("email") || "";
+
+      const verifyData = await graphqlRequest<{
+        verifyOtp: { success: boolean; message: string };
+      }>({
+        query: VERIFY_OTP,
+        variables: { email, otp: code },
+      });
+
+      if (verifyData.verifyOtp.success) {
+        router.push(route.login);
+      } else {
+        setError(verifyData.verifyOtp.message || "Invalid code, please try again.");
+      }
+    } catch (err) {
+      console.error("Verify OTP error:", err);
+      setError("Something went wrong.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const formatTime = (seconds: number): string => seconds.toString().padStart(2, "0");
-
-  /* -----------------------------------
-     RESEND OTP
-  ------------------------------------ */
   const resendCode = async () => {
-    // TODO: Replace with GraphQL mutation
-    const newOtp = "123456";
+    try {
+      setIsLoading(true);
 
-    sessionStorage.setItem("devOtp", newOtp);
-    sessionStorage.setItem("otpTimestamp", Date.now().toString());
+      const email = sessionStorage.getItem("email") || "";
 
-    setOtp(newOtp);
-    setExpired(false);
-    setTimeLeft(30);
-    startTimer(30);
+      const resendData = await graphqlRequest<{
+        sendOtp: { success: boolean; message: string; otp: string };
+      }>({
+        query: RESEND_OTP,
+        variables: { email },
+      });
+
+      const newOtp = resendData.sendOtp.otp;
+
+      if (newOtp) {
+        sessionStorage.setItem("devOtp", newOtp);
+        setOtp(newOtp);
+        fillInputsFromOtp(newOtp);
+        setExpired(false);
+        startTimer(30);
+      } else {
+        console.warn("Resend did not return an otp");
+      }
+    } catch (err) {
+      console.error("Resend OTP failed:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  /* --------------------------
-     JSX (unchanged)
-  --------------------------- */
+  const formatTime = (seconds: number) => seconds.toString().padStart(2, "0");
+
   return (
     <div className={`flex flex-col gap-4 ${className}`.trim()}>
       <h2 className="body text-left font-normal">
@@ -245,6 +276,7 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
               value={value}
               onChange={e => handleChange(e, i)}
               onKeyDown={e => handleKeyDown(e, i)}
+              onFocus={() => setInputFocused(true)}
               className={`h-12 w-12 rounded-[4px] border text-center text-lg font-medium caret-transparent focus:ring-1 focus:ring-indigo-500 focus:outline-none md:h-[54px] md:w-[41px] ${
                 error ? "border-red-500" : "border-[#e6e6e6]"
               }`}
@@ -265,24 +297,17 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
         )}
 
         <div className="identifier-links-and-button-grid">
-          <button
-            className="btn primary full-width"
-            data-testid="sign-up-create-account-button"
-            id="signUpContinueButton"
-            type="submit"
-            disabled={isLoading}
-          >
+          <button className="btn primary full-width" type="submit" disabled={isLoading}>
             {isLoading ? "Verifying..." : "Continue"}
           </button>
         </div>
 
         <hr className="mt-2 mb-2 w-full border-[0.5px] border-[#e6e6e6]" />
         <p>Didn&apos;t receive a code?</p>
+
         <div className="identifier-links-and-button-grid">
           <button
             className="btn secondary full-width"
-            data-testid="sign-up-create-account-button"
-            id="signUpContinueButton"
             type="button"
             disabled={!expired}
             onClick={resendCode}
@@ -295,7 +320,6 @@ export const OTPInputForm = ({ length = 6, autoFocus = true, className = "" }: O
       {timeLeft > 0 && (
         <div className="mt-2 text-center text-sm text-gray-500">
           <p className="mb-2 text-left text-[16px] leading-[24px]">
-            {" "}
             We have sent you a new code. Please check your spam folder if it has not arrived within
             1 minute.
           </p>

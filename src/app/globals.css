@@ -4,28 +4,28 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'Sky Text';
+  font-family: "Sky Text";
   font-weight: normal;
   font-display: swap;
-  src: url('https://static.skyassets.com/fonts/sky-regular.woff2') format('woff');
+  src: url("https://static.skyassets.com/fonts/sky-regular.woff2") format("woff");
 }
 
 @font-face {
-  font-family: 'Sky Text';
+  font-family: "Sky Text";
   font-weight: bold;
   font-display: swap;
-  src: url('https://static.skyassets.com/fonts/sky-medium.woff2') format('woff');
+  src: url("https://static.skyassets.com/fonts/sky-medium.woff2") format("woff");
 }
 @font-face {
-  font-family: 'Sky Text';
+  font-family: "Sky Text";
   font-display: fallback;
   src:
-    url('//static.skyassets.com/fonts/sky-regular.woff2') format('woff2'),
-    url('//static.skyassets.com/fonts/sky-regular.woff') format('woff');
+    url("//static.skyassets.com/fonts/sky-regular.woff2") format("woff2"),
+    url("//static.skyassets.com/fonts/sky-regular.woff") format("woff");
 }
 :root {
   box-sizing: border-box;
-  --baseFont: 'Sky Text';
+  --baseFont: "Sky Text";
   --baseSpacing: 18px;
   --baseFontSize: 16px;
   --baseFontColor: #4a4a4a;
@@ -80,7 +80,7 @@
   --color-background: var(--color-grey2);
 }
 html,
-body{
+body {
   font-family: "Sky Text", sans-serif;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -101,13 +101,23 @@ main {
 }
 
 a {
-    color: rgb(0, 15, 245);
-    cursor: pointer;
-    text-decoration: none;
+  color: rgb(0, 15, 245);
+  cursor: pointer;
+  text-decoration: none;
 }
 
-p,h3 {
-  margin: 0;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: inherit;
+  font-weight: normal;
+  margin: 0px;
 }
 
 input {
@@ -124,8 +134,3 @@ hr {
     background-color: var(--color-background);
   }
 }
-
-
-
-
-

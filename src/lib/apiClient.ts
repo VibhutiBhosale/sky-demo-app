@@ -1,24 +1,31 @@
-// src/lib/apiClient.ts
-export interface ApiResponse<T> {
-  data: T;
-  errors?: { message: string }[];
+// -----------------------------------------------------
+// 🔹 GraphQL API Types
+// -----------------------------------------------------
+
+export interface GraphQLErrorItem {
+  message: string;
 }
 
-interface GraphQLRequestOptions<T> {
+export interface ApiResponse<T> {
+  data: T | null;
+  errors?: GraphQLErrorItem[];
+}
+
+export interface GraphQLRequestOptions<TVars> {
   query: string;
-  variables?: Record<string, any>;
+  variables?: TVars;
   includeCredentials?: boolean;
 }
 
-/**
- * 🔹 Generic GraphQL API client
- * Handles fetch, JSON parsing, and error throwing consistently
- */
-export async function graphqlRequest<T>({
+// -----------------------------------------------------
+// 🔹 Generic GraphQL Client (no any)
+// -----------------------------------------------------
+
+export async function graphqlRequest<TData, TVars = Record<string, unknown>>({
   query,
-  variables = {},
+  variables,
   includeCredentials = true,
-}: GraphQLRequestOptions<T>): Promise<T> {
+}: GraphQLRequestOptions<TVars>): Promise<TData> {
   const res = await fetch("/api/graphql", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -26,7 +33,7 @@ export async function graphqlRequest<T>({
     body: JSON.stringify({ query, variables }),
   });
 
-  const json: ApiResponse<T> = await res.json();
+  const json: ApiResponse<TData> = await res.json();
 
   if (json.errors?.length) {
     throw new Error(json.errors[0].message);
@@ -39,15 +46,15 @@ export async function graphqlRequest<T>({
   return json.data;
 }
 
-/**
- * 🔹 Generic REST API client for plain JSON endpoints
- * e.g., /api/graphql/check-identifier
- */
-export async function restRequest<T>(
+// -----------------------------------------------------
+// 🔹 Generic REST JSON Client (no any)
+// -----------------------------------------------------
+
+export async function restRequest<TData, TBody extends Record<string, unknown>>(
   url: string,
-  body: Record<string, any>,
+  body: TBody,
   options?: { includeCredentials?: boolean }
-): Promise<T> {
+): Promise<TData> {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -60,6 +67,5 @@ export async function restRequest<T>(
     throw new Error(`Request failed: ${res.status} ${text}`);
   }
 
-  const data = await res.json();
-  return data as T;
+  return (await res.json()) as TData;
 }
