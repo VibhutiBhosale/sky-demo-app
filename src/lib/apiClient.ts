@@ -1,7 +1,3 @@
-// -----------------------------------------------------
-// 🔹 GraphQL API Types
-// -----------------------------------------------------
-
 export interface GraphQLErrorItem {
   message: string;
 }
@@ -17,10 +13,7 @@ export interface GraphQLRequestOptions<TVars> {
   includeCredentials?: boolean;
 }
 
-// -----------------------------------------------------
-// 🔹 Generic GraphQL Client (no any)
-// -----------------------------------------------------
-
+//GraphQL Client
 export async function graphqlRequest<TData, TVars = Record<string, unknown>>({
   query,
   variables,
@@ -46,13 +39,10 @@ export async function graphqlRequest<TData, TVars = Record<string, unknown>>({
   return json.data;
 }
 
-// -----------------------------------------------------
-// 🔹 Generic REST JSON Client (no any)
-// -----------------------------------------------------
-
+// Rest API
 export async function restRequest<TData, TBody extends Record<string, unknown>>(
   url: string,
-  body: TBody,
+  body?: TBody,
   options?: { includeCredentials?: boolean }
 ): Promise<TData> {
   const res = await fetch(url, {

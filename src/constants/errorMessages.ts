@@ -15,5 +15,9 @@ export const errorMessages = {
     generalFallback: "Please fix form errors before continuing.",
     signupFailed: "This email is already registered.",
     emailAlreadyExist: "Account already exists. Please use a different email or sign in.",
+    otpSendFailed: "OTP sending failed. Try again.",
+  },
+  updateEmail: {
+    generalFallback: "Please correct the errors above.",
   },
 };

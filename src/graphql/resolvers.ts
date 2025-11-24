@@ -1,8 +1,8 @@
-import User from "../models/User";
-import Otp from "../models/Otp";
+import User from "@/models/User";
+import Otp from "@/models/Otp";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import dbConnect from "../lib/mongodb";
+import dbConnect from "@/lib/mongodb";
 import { GraphQLError } from "graphql";
 import {
   createAccessToken,
@@ -12,47 +12,8 @@ import {
 } from "../lib/auth";
 import { UpdateSignupEmailArgs } from "@/types/types";
 
-// ✅ Define shared context and argument types
-interface GraphQLContext {
-  userId?: string;
-  res?: {
-    setHeader: (key: string, value: string | string[]) => void;
-  };
-}
-
-interface SignupArgs {
-  name?: string;
-  email: string;
-  password: string;
-}
-
-interface LoginArgs {
-  email: string;
-  password: string;
-}
-
-interface VerifyPasswordArgs {
-  identifier: string;
-  password: string;
-}
-
-interface SendOtpArgs {
-  email: string;
-}
-
-interface VerifyOtpArgs {
-  email: string;
-  otp: string;
-}
-
-interface JwtPayload {
-  userId: string;
-  email: string;
-}
-
 export const resolvers = {
   Query: {
-    // ✅ me query
     me: async (_parent: unknown, _args: Record<string, never>, context: GraphQLContext) => {
       if (!context.userId) return null;
       return await User.findById(context.userId);
@@ -60,7 +21,7 @@ export const resolvers = {
   },
 
   Mutation: {
-    // ✅ Signup
+    // Signup
     signup: async (
       _parent: unknown,
       { name, email, password }: SignupArgs,
@@ -114,7 +75,7 @@ export const resolvers = {
       };
     },
 
-    // ✅ Login
+    // Login
     login: async (_parent: unknown, { email, password }: LoginArgs, context: GraphQLContext) => {
       await dbConnect();
 
@@ -146,7 +107,7 @@ export const resolvers = {
       };
     },
 
-    // ✅ Logout
+    // Logout
     logout: async (_parent: unknown, _args: Record<string, never>, context: GraphQLContext) => {
       if (context.res) {
         const clear = clearRefreshCookie();
@@ -155,7 +116,7 @@ export const resolvers = {
       return { success: true };
     },
 
-    // ✅ Verify Password
+    // Verify Password
     verifyPassword: async (
       _parent: unknown,
       { identifier, password }: VerifyPasswordArgs
@@ -200,7 +161,6 @@ export const resolvers = {
       await dbConnect();
 
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log(`Generated OTP for ${email}: ${otp}`);
 
       // Replace existing OTP if user requests resend
       await Otp.findOneAndUpdate({ email }, { otp, createdAt: new Date() }, { upsert: true });
@@ -214,47 +174,39 @@ export const resolvers = {
 
     updateSignupEmail: async (_parent: unknown, { oldEmail, newEmail }: UpdateSignupEmailArgs) => {
       try {
-        console.log("➡️ updateSignupEmail resolver called", { oldEmail, newEmail });
-
-        // 1️⃣ ensure DB is connected
+        //ensure DB is connected
         await dbConnect();
 
-        // 2️⃣ Look for user with the old email
+        //Look for user with the old email
         const existingUser = await User.findOne({ email: oldEmail });
 
         if (!existingUser) {
-          console.log("❌ oldEmail not found:", oldEmail);
           return {
             success: false,
             message: "Original email not found. Restart signup process.",
           };
         }
 
-        // 3️⃣ Check if new email already exists (duplicate prevention)
+        //Check if new email already exists (duplicate prevention)
         const userWithNewEmail = await User.findOne({ email: newEmail });
 
         if (userWithNewEmail) {
-          console.log("❌ newEmail already exists:", newEmail);
           return {
             success: false,
             message: "Account already exists. Please use a different email or sign in.",
           };
         }
 
-        // 4️⃣ Update email in DB
-        console.log("🔄 Updating email...");
+        //Update email in DB
         existingUser.email = newEmail;
         await existingUser.save();
 
-        console.log("✅ Email update successful!");
-
-        // 5️⃣ Return success response
+        //Return success response
         return {
           success: true,
           message: "Email updated successfully.",
         };
       } catch (err) {
-        console.error("🔥 updateSignupEmail error:", err);
         return {
           success: false,
           message: "Failed to update email.",

@@ -11,6 +11,7 @@ export const labels = {
     welcomeLebel: "Welcome back",
     changeemailandUsername: "Change email or username",
     forgotPasswordLink: "Forgotten your password?",
+    password: "Password",
   },
   signup: {
     fullName: "Full Name",
@@ -34,5 +35,19 @@ export const labels = {
   verifyEmail: {
     heading: "Verify your email",
     subHeading: "Enter the 6-digit code we’ve sent to:",
+  },
+  updateEmail: {
+    heading: "Update your email address",
+    emailInputLable: "Enter new email address",
+    confirmEmailInputLabel: "Confirm new email address",
+  },
+  footer: {
+    logoHeading: "Sky home page",
+    copyrightText: "© 2025 Sky UK",
+  },
+  header: {
+    notificationHeading: "You're up to date",
+    notificationDesc: "No new alerts",
+    signInText: "Sign in",
   },
 };

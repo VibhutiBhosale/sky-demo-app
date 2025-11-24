@@ -8,7 +8,7 @@ import ErrorIcon from "@/components/icons/ErrorIcon";
 import { useUpdateEmailForm } from "@/hooks/useUpdateEmailForm";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { graphqlRequest } from "@/lib/apiClient";
-import { route, errorMessages } from "@/constants";
+import { route, errorMessages, labels } from "@/constants";
 import { UPDATE_SIGNUP_EMAIL_MUTATION, SEND_OTP_MUTATION } from "@/graphql/mutations/auth";
 
 export default function UpdateEmail() {
@@ -35,7 +35,7 @@ export default function UpdateEmail() {
   const { handleSubmit, loading } = useFormSubmit({
     validate: () => {
       const ok = validateAll();
-      return ok ? true : { general: "Please correct the errors above." };
+      return ok ? true : { general: errorMessages.updateEmail.generalFallback };
     },
 
     request: async ({ email1 }: { email1: string }) => {
@@ -93,7 +93,7 @@ export default function UpdateEmail() {
       <div className="card-container">
         <div className="card">
           <div className="sign-in-outer-grid">
-            <h2 className="page-heading">Update your email address</h2>
+            <h2 className="page-heading">{labels.updateEmail.heading}</h2>
 
             <div className="form-wrapper" id="userDetailsFormWrapper">
               <form
@@ -107,8 +107,9 @@ export default function UpdateEmail() {
                   <div className="text-input-container type-email label-in-border">
                     <div className="input-wrapper">
                       <TextField
-                        label="Enter new email address"
+                        label={labels.updateEmail.emailInputLable}
                         variant="outlined"
+                        id={"email"}
                         value={email1}
                         onChange={e => handleEmail1Change(e.target.value)}
                         onBlur={() => handleEmail1Change(email1)}
@@ -139,9 +140,10 @@ export default function UpdateEmail() {
                   <div className="text-input-container type-email label-in-border">
                     <div className="input-wrapper">
                       <TextField
-                        label="Confirm new email address"
+                        label={labels.updateEmail.confirmEmailInputLabel}
                         variant="outlined"
                         value={email2}
+                        id={"confirmEmail"}
                         onChange={e => handleEmail2Change(e.target.value)}
                         onBlur={() => handleEmail2Change(email2)}
                         onFocus={() => setShrinkLabel2(true)}
@@ -180,7 +182,7 @@ export default function UpdateEmail() {
             </div>
 
             <div className="color-[#000ff5] font-bold">
-              <Link href="/verify-email" className="link body dark active">
+              <Link href={route.verifyEmail} className="link body dark active">
                 Back
               </Link>
             </div>
