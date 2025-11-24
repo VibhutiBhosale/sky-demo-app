@@ -1,12 +1,6 @@
 import { useState } from "react";
 
 interface FormSubmitOptions<TValues, TResponse> {
-  /**
-   * Optional validation before submitting.
-   * Can return either:
-   * - boolean (true = valid, false = invalid)
-   * - or Record<string, string> (field-level errors)
-   */
   validate?: (values: TValues) => boolean | Record<string, string>;
   request: (values: TValues) => Promise<TResponse>;
   onSuccess?: (response: TResponse) => void;
@@ -26,7 +20,6 @@ export function useFormSubmit<TValues extends object, TResponse>({
     e.preventDefault();
     setErrors({});
 
-    // ✅ 1. Validation
     if (validate) {
       const result = validate(values);
       if (typeof result === "boolean" && !result) {
@@ -39,7 +32,6 @@ export function useFormSubmit<TValues extends object, TResponse>({
       }
     }
 
-    // ✅ 2. Make request
     setLoading(true);
     try {
       const response = await request(values);

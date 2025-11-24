@@ -20,9 +20,6 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@src/*": ["./src/*"],
-      "@services/*": ["./src/services/*"],
-      "@hooks/*": ["./src/hooks/*"],
     }
   },
   "include": [

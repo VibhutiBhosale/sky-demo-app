@@ -71,14 +71,14 @@ export default function Signup() {
 
         const otp = otpData.sendOtp.otp;
 
-        // STORE OTP + EMAIL SECURELY (NOT IN URL)
+        // store OTP + email securely
         sessionStorage.setItem("devOtp", otp);
         sessionStorage.setItem("email", email);
 
         router.push(route.verifyEmail);
       } catch (err) {
         console.error("OTP Error:", err);
-        setServerError("OTP sending failed. Try again.");
+        setServerError(errorMessages.signup.otpSendFailed);
       }
     },
 
@@ -101,10 +101,8 @@ export default function Signup() {
       <div className="card-container">
         <div className="card">
           <div className="user-details-page-grid">
-            <h1 className="page-heading" data-testid="signup-page-heading">
-              {labels.signup.createAccount}
-            </h1>
-            <div className="form-wrapper" id="userDetailsFormWrapper">
+            <h1 className="page-heading">{labels.signup.createAccount}</h1>
+            <div className="form-wrapper">
               <form
                 className="user-details-content-grid"
                 onSubmit={e => {
@@ -134,9 +132,7 @@ export default function Signup() {
                         onBlur={() => handleNameChange(name)}
                       />
                       <span className="pseudo-focus"></span>
-                      <p aria-hidden="true" className="displayed-input-label">
-                        {labels.signup.fullName}
-                      </p>
+                      <p className="displayed-input-label">{labels.signup.fullName}</p>
                     </div>
                     {touchedFullName && fullNameError && (
                       <div className="error-message-container input-error-message">
@@ -162,9 +158,7 @@ export default function Signup() {
                         onBlur={() => handleEmailChange(email)}
                       />
                       <span className="pseudo-focus"></span>
-                      <p aria-hidden="true" className="displayed-input-label">
-                        {labels.signup.email}
-                      </p>
+                      <p className="displayed-input-label">{labels.signup.email}</p>
                     </div>
                     {touchedEmail && emailError && (
                       <div className="error-message-container input-error-message">
@@ -181,6 +175,7 @@ export default function Signup() {
                           passwordErrors && touchedPassword ? "input-error" : ""
                         }`}
                         id="password"
+                        data-testid="password-input"
                         name="password"
                         required
                         type={showPassword ? "text" : "password"}
@@ -192,9 +187,7 @@ export default function Signup() {
                         }}
                       />
                       <span className="pseudo-focus"></span>
-                      <p aria-hidden="true" className="displayed-input-label">
-                        {labels.signup.password}
-                      </p>
+                      <p className="displayed-input-label">{labels.signup.password}</p>
                       <button
                         className="toggle-field-type"
                         type="button"
@@ -257,12 +250,7 @@ export default function Signup() {
                   </button>
                   <div className="user-details-sign-in-wrap">
                     <span className="link-container inline">
-                      <Link
-                        data-testid="sign-up-link-to-sign-in"
-                        href="/login"
-                        className="link body dark active"
-                        aria-current="page"
-                      >
+                      <Link href="/login" className="link body dark active">
                         {labels.signup.backToSignIn}
                       </Link>
                       <span className="pseudo-focus"></span>

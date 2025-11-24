@@ -6,6 +6,7 @@ import ErrorIcon from "@/components/icons/ErrorIcon";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { restRequest } from "@/lib/apiClient";
 import { errorMessages, labels, route, apiRoutes } from "@/constants";
+import { CheckIdentifierResponse, CheckIdentifierRequest } from "./login.dt";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,11 +19,10 @@ export default function LoginPage() {
       return errs;
     },
     request: async ({ identifier }: { identifier: string }) => {
-      const data = await restRequest<{
-        success: boolean;
-        message?: string;
-        error?: { message?: string };
-      }>(apiRoutes.checkIdentifier, { identifier });
+      const data = (await restRequest)<CheckIdentifierResponse, CheckIdentifierRequest>(
+        apiRoutes.checkIdentifier,
+        { identifier }
+      );
       return data;
     },
     onSuccess: data => {
@@ -45,17 +45,9 @@ export default function LoginPage() {
       <div className="card-container">
         <div className="card">
           <div className="sign-in-outer-grid">
-            <h2 className="page-heading" data-testid="identifier-page-heading">
-              {labels.login.greeting}
-            </h2>
-            <h3
-              data-testid="identifier-page-sub-heading"
-              aria-hidden="true"
-              className="body text dark"
-            >
-              {labels.login.subHeading}
-            </h3>
-            <div className="form-wrapper" id="identifierFormWrapper">
+            <h2 className="page-heading">{labels.login.greeting}</h2>
+            <h3 className="body text dark">{labels.login.subHeading}</h3>
+            <div className="form-wrapper">
               <form
                 className="form-input-and-control-grid"
                 onSubmit={e => handleSubmit(e, { identifier })}
@@ -82,18 +74,12 @@ export default function LoginPage() {
                       disabled={loading}
                     />
                     <span className="pseudo-focus"></span>
-                    <p aria-hidden="true" className="displayed-input-label">
-                      {labels.login.textLabel}
-                    </p>
+                    <p className="displayed-input-label">{labels.login.textLabel}</p>
                   </div>
                   {errors.email && (
                     <div className="error-message-container">
                       <ErrorIcon />
-                      <p
-                        id="identifierAriaErrorText"
-                        data-testid="identifier-input-error"
-                        className="body-sm text ta-left error-message negative-regular"
-                      >
+                      <p className="body-sm text ta-left error-message negative-regular">
                         {errors.email}
                       </p>
                     </div>
@@ -102,8 +88,6 @@ export default function LoginPage() {
                 <div className="identifier-links-and-button-grid">
                   <span className="link-container inline">
                     <a
-                      data-testid="identifier-forgotton-username-link"
-                      id="forgotUsernameLink"
                       href="https://skyid.sky.com/forgotusername/skycom/7b2261223a2268747470733a2f2f69642e736b792e636f6d2f222c2262223a2268747470733a2f2f69642e736b792e636f6d2f227d"
                       className="link body dark inactive"
                     >
@@ -119,11 +103,7 @@ export default function LoginPage() {
                     {loading ? "Checking..." : "Continue"}
                   </button>
                   <span className="link-container inline">
-                    <a
-                      data-testid="identifier-create-account-link"
-                      href="/signup"
-                      className="link body dark inactive"
-                    >
+                    <a href="/signup" className="link body dark inactive">
                       {labels.login.createAccountLink}
                     </a>
                     <span className="pseudo-focus"></span>

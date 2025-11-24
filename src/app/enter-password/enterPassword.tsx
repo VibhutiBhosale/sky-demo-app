@@ -73,24 +73,11 @@ export default function EnterPassword() {
       <div className="card-container">
         <div className="card">
           <div className="sign-in-outer-grid">
-            <h2 className="page-heading" data-testid="identifier-page-heading">
-              {labels.enterPassword.welcomeLebel}
-            </h2>
-            <h3
-              data-testid="identifier-page-sub-heading"
-              aria-hidden="true"
-              className="body text dark"
-            >
-              {identifier}
-            </h3>
+            <h2 className="page-heading">{labels.enterPassword.welcomeLebel}</h2>
+            <h3 className="body text dark">{identifier}</h3>
             <div className="change-email-link-wrapper">
               <span className="link-container inline">
-                <Link
-                  href="/"
-                  data-testid="password-change-identifier-link"
-                  className="link body dark active"
-                  aria-current="page"
-                >
+                <Link href="/" className="link body dark active">
                   <span className="text-link-with-chevron-content">
                     {labels.enterPassword.changeemailandUsername}
                     <NextIcon />
@@ -100,7 +87,7 @@ export default function EnterPassword() {
               </span>
             </div>
 
-            <div className="form-wrapper" id="identifierFormWrapper">
+            <div className="form-wrapper">
               <form
                 className="form-input-and-control-grid"
                 onSubmit={e => handleSubmit(e, { identifier, password })}
@@ -126,14 +113,12 @@ export default function EnterPassword() {
                     />
                     <span className="pseudo-focus"></span>
                     <p aria-hidden="true" className="displayed-input-label">
-                      Password
+                      {labels.enterPassword.password}
                     </p>
                     <button
                       className="toggle-field-type"
                       type="button"
                       aria-label={showPassword ? "Hide password" : "Show password"}
-                      data-testid="password-input-toggle"
-                      id="passwordToggle"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <PasswordToggleOffIcon /> : <PasswordToggleOnIcon />}
@@ -142,11 +127,7 @@ export default function EnterPassword() {
                   {errors.password && (
                     <div className="error-message-container">
                       <ErrorIcon />
-                      <p
-                        id="identifierAriaErrorText"
-                        data-testid="identifier-input-error"
-                        className="body-sm text ta-left error-message negative-regular"
-                      >
+                      <p className="body-sm text ta-left error-message negative-regular">
                         {errors.password}
                       </p>
                     </div>
@@ -155,8 +136,6 @@ export default function EnterPassword() {
                 <div className="identifier-links-and-button-grid">
                   <span className="link-container inline">
                     <a
-                      data-testid="identifier-forgotton-username-link"
-                      id="forgotUsernameLink"
                       href="https://skyid.sky.com/forgotusername/skycom/7b2261223a2268747470733a2f2f69642e736b792e636f6d2f222c2262223a2268747470733a2f2f69642e736b792e636f6d2f227d"
                       className="link body dark inactive"
                     >
@@ -164,12 +143,7 @@ export default function EnterPassword() {
                     </a>
                     <span className="pseudo-focus"></span>
                   </span>
-                  <button
-                    className="btn primary full-width"
-                    data-testid="identifier-submit"
-                    type="submit"
-                    disabled={loading}
-                  >
+                  <button className="btn primary full-width" type="submit" disabled={loading}>
                     {loading ? "Verifying..." : "Continue"}
                   </button>
                 </div>

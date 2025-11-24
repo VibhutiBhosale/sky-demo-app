@@ -1,0 +1,220 @@
+.footer {
+  background: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative;
+  box-sizing: border-box;
+  padding-bottom: 3px;
+  &::before {
+    content: '';
+    bottom: 0;
+    left: 0;
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background-image: linear-gradient(
+      to right,
+      #ff8c00 5%,
+      #f80032 25%,
+      #ff00a0 45%,
+      #8c28ff 65%,
+      #0023ff 82%,
+      #19a0ff 96%
+    );
+  }
+
+  .inner-container {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: inherit;
+    align-items: center;
+    max-width: 1600px;
+    margin: 0 auto;
+    position: relative;
+    height: auto;
+    padding: 1.5rem 0 1.5rem;
+
+    .logo-wrapper {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: inherit;
+      align-items: center;
+      order: 2;
+
+      .masthead-logo {
+        display: inline-block;
+        width: 44px;
+        height: 27px;
+      }
+
+      a {
+        cursor: pointer;
+        display: block;
+        height: 25px;
+        position: relative;
+        width: 40px;
+        background-image: url(https://id.sky.com/static-assets/sky-logo-small.png);
+        background-size: contain;
+        background-position: center;
+        &::before {
+          content: '';
+          display: block;
+          left: 50%;
+          min-height: 44px;
+          min-width: 44px;
+          position: absolute;
+          top: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        &::after {
+          border-radius: calc(0.25rem + 0.25rem);
+          border: 2px solid #007ecc;
+          content: '';
+          display: block;
+          inset: calc(-3px - 4px) calc(-4px - 4px);
+          opacity: 0;
+          pointer-events: none;
+          position: absolute;
+          transition: all 0.1s ease-in-out;
+        }
+
+        .logo-text {
+          border: 0;
+          clip: rect(0 0 0 0);
+          height: 1px;
+          margin: -1px;
+          overflow: hidden;
+          padding: 0;
+          position: absolute;
+          width: 40px;
+          white-space: nowrap;
+        }
+      }
+      .copyright {
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+        margin-left: 1.5rem;
+        white-space: nowrap;
+      }
+    }
+  }
+  .footer-links-wrapper {
+    ul {
+      margin: 0;
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: inherit;
+      align-items: inherit;
+      padding: 0;
+
+      li {
+        display: inline-block;
+        flex-basis: 50%;
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+        a {
+          color: #4a4a4a;
+          cursor: pointer;
+          padding: 0.5rem 1rem;
+          position: relative;
+          display: inline-block;
+        }
+        &::after {
+          border-radius: calc(0.25rem + 0.25rem);
+          border: 2px solid #007ecc;
+          content: '';
+          display: block;
+          inset: calc(4px - 4px) calc(8px - 4px);
+          opacity: 0;
+          pointer-events: none;
+          position: absolute;
+          transition: all 0.1s ease-in-out;
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 53.125em) {
+  .footer {
+    .inner-container {
+      padding: 0.75rem 1rem 1rem;
+      flex-wrap: nowrap;
+      .logo-wrapper {
+        order: 1;
+        margin-right: 4.5rem;
+        .masthead-logo {
+          width: 56px;
+          height: 35px;
+        }
+      }
+      .footer-links-wrapper {
+        flex: 1 1 0;
+        order: 2;
+        ul {
+          justify-content: center;
+        }
+        li {
+          flex-basis: auto;
+          margin: 0 0.25rem;
+
+          a {
+            padding: 0.5rem 0.75rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 75em) {
+  .footer {
+    padding-right: 2rem;
+    padding-left: 2rem;
+
+    .inner-container {
+      padding-left: 0;
+      padding-right: 0;
+      .masthead-logo {
+        width: 56px;
+        height: 35px;
+      }
+      .footer-links-wrapper {
+        li {
+          font-size: 1rem;
+          line-height: 1.5rem;
+        }
+      }
+
+      .copyright {
+        font-size: 1rem;
+        line-height: 1.5rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 53.115em) {
+  .logo-wrapper {
+    padding-left: 1rem;
+    flex: 1;
+  }
+  .footer {
+    .footer-links-wrapper {
+      ul {
+        padding-bottom: 1rem;
+      }
+    }
+  }
+}
+
+@media (min-width: 34.375em) and (max-width: 53.115em) {
+  .footer {
+    .footer-links-wrapper {
+      ul li {
+        flex-basis: 33.333%;
+      }
+    }
+  }
+}

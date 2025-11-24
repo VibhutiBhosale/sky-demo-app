@@ -20,91 +20,18 @@ import {
   ClickAwayListener,
   Paper,
 } from "@mui/material";
-
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
+import { labels } from "@/constants";
+import { NAV_ITEMS } from "@/constants";
+import Image from "next/image";
+
 import "./header.scss";
 
-interface NavItem {
-  key: string;
-  url?: string;
-  submenu?: string[];
-  position: "left" | "right";
-}
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    key: "Watch",
-    url: "/watch",
-    submenu: ["Cinema", "Sports", "Kids", "discovery+", "What to watch"],
-    position: "left",
-  },
-  {
-    key: "TV",
-    url: "/tv",
-    submenu: ["Stream", "Glass", "Sky Q", "TV & Broadband"],
-    position: "left",
-  },
-  {
-    key: "Glass",
-    url: "/glass",
-    submenu: ["Glass Gen 2", "Glass Air", "New", "Tech specs", "Switching to Sky Glass"],
-    position: "left",
-  },
-  {
-    key: "Broadband",
-    url: "/broadband",
-    submenu: [
-      "Broadband",
-      "TV & Broadband",
-      "Full Fibre Broadband",
-      "Broadband for Gaming",
-      "Broadband for Business",
-    ],
-    position: "left",
-  },
-  {
-    key: "Mobile",
-    url: "/mobile",
-    submenu: [
-      "Sky Mobile",
-      "Phones",
-      "SIM",
-      "Tablets & Laptops",
-      "Brands",
-      "Accessories",
-      "SIM Activation",
-      "Manage",
-    ],
-    position: "left",
-  },
-  { key: "Protect", url: "/protect", position: "left" },
-  { key: "Business", url: "/business", position: "left" },
-  { key: "Deals", url: "/deals", position: "left" },
-
-  // RIGHT SIDE ITEM — Help menu
-  {
-    key: "Help",
-    url: "/help",
-    submenu: [
-      "Help",
-      "My Account",
-      "Broadband",
-      "TV",
-      "Mobile",
-      "Talk",
-      "VIP",
-      "Sky Customer Forum",
-    ],
-    position: "right",
-  },
-];
-
-export default function Header(): JSX.Element {
+export default function Header() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuOpenKey, setMenuOpenKey] = useState<string>("");
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
@@ -115,12 +42,12 @@ export default function Header(): JSX.Element {
 
   const handleArrowClick = (event: React.MouseEvent<HTMLElement>, key: string) => {
     if (menuOpenKey === key) {
-      setAnchorEl(null);
       setMenuOpenKey("");
-    } else {
-      setAnchorEl(event.currentTarget);
-      setMenuOpenKey(key);
+      setAnchorEl(null);
+      return;
     }
+    setMenuOpenKey(key);
+    setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => {
@@ -132,9 +59,7 @@ export default function Header(): JSX.Element {
     setOpenMobileKeys(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Single-source for ALL nav dropdown data
   const activeMenu = NAV_ITEMS.find(item => item.key === menuOpenKey);
-
   const LEFT_ITEMS = NAV_ITEMS.filter(i => i.position === "left");
   const HELP_ITEM = NAV_ITEMS.find(i => i.position === "right");
 
@@ -156,12 +81,10 @@ export default function Header(): JSX.Element {
               "@media (min-width:600px)": { minHeight: "44px" },
             }}
           >
-            {/* Logo */}
             <div className="logo-wrapper">
-              <a className="masthead-logo" href="https://www.sky.com" aria-label="Sky home"></a>
+              <a className="masthead-logo" href="https://www.sky.com"></a>
             </div>
 
-            {/* LEFT NAV */}
             <nav className="mr-auto flex items-center gap-4 pl-6">
               {LEFT_ITEMS.map(item => (
                 <div key={item.key} className="relative flex items-center gap-1">
@@ -191,11 +114,9 @@ export default function Header(): JSX.Element {
               ))}
             </nav>
 
-            {/* RIGHT SIDE UTILITIES */}
             <div className="flex items-center gap-4">
               <SearchIcon className="cursor-pointer text-gray-600" />
 
-              {/* BELL ICON */}
               <IconButton
                 disableRipple
                 disableFocusRipple
@@ -205,7 +126,6 @@ export default function Header(): JSX.Element {
                 <NotificationsNoneIcon className="cursor-pointer text-gray-600" />
               </IconButton>
 
-              {/* HELP MENU (RIGHT-SIDE NAV ITEM) */}
               {HELP_ITEM && (
                 <div className="relative flex items-center gap-1">
                   <span className="text-base text-[#4a4a4a]">{HELP_ITEM.key}</span>
@@ -229,7 +149,7 @@ export default function Header(): JSX.Element {
               )}
 
               <a href="/login" className="text-base leading-6 text-[#4a4a4a] hover:underline">
-                Sign in
+                {labels.header.signInText}
               </a>
             </div>
           </Toolbar>
@@ -237,10 +157,22 @@ export default function Header(): JSX.Element {
       </div>
 
       {/* DROPDOWN MENU */}
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        {activeMenu?.submenu?.map(s => (
-          <MenuItem key={s} onClick={handleMenuClose}>
-            {s}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        disableScrollLock
+        disableAutoFocusItem
+        disableRestoreFocus
+        slotProps={{
+          paper: {
+            className: activeMenu?.key === "Help" ? "flex justify-end" : "",
+          },
+        }}
+      >
+        {activeMenu?.submenu?.map(submenu => (
+          <MenuItem key={submenu} onClick={handleMenuClose}>
+            {submenu}
           </MenuItem>
         ))}
       </Menu>
@@ -284,7 +216,7 @@ export default function Header(): JSX.Element {
       >
         <Box className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b px-4 py-3">
-            <img src="/sky-logo.png" alt="logo" className="h-6" />
+            <Image src="/sky-logo.png" alt="logo" className="h-6" />
 
             <IconButton onClick={() => setDrawerOpen(false)} disableRipple disableFocusRipple>
               <CloseIcon />
@@ -369,8 +301,10 @@ export default function Header(): JSX.Element {
               boxShadow: "0px 8px 20px rgba(0,0,0,0.12)",
             }}
           >
-            <h3 className="text-[18px] font-semibold text-[#4a4a4a]">You&apos;re up to date</h3>
-            <p className="mt-1 text-[14px] text-[#666]">No new alerts</p>
+            <h3 className="text-[18px] font-semibold text-[#4a4a4a]">
+              {labels.header.notificationHeading}
+            </h3>
+            <p className="mt-1 text-[14px] text-[#666]">{labels.header.notificationDesc}</p>
           </Paper>
         </ClickAwayListener>
       </Popper>

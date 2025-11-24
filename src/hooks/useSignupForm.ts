@@ -32,7 +32,6 @@ export function useSignupForm() {
     password: false,
   });
 
-  // ✅ Field-level validation
   const validateFullName = (value: string): string | null => {
     if (!value.trim()) return "Enter your full name.";
     if (value.trim().length < 4) return "The full name must be longer than 3 characters.";
@@ -56,7 +55,6 @@ export function useSignupForm() {
     return null;
   };
 
-  // ✅ Validate all fields at once (for onSubmit)
   const validateAll = (): boolean => {
     const nameErr = validateFullName(values.name);
     const emailErr = validateEmail(values.email);
@@ -77,7 +75,6 @@ export function useSignupForm() {
     return !(nameErr || emailErr || passErr);
   };
 
-  // ✅ Inline field validation handlers
   const handleNameChange = (value: string) => {
     setValues(prev => ({ ...prev, name: value }));
     setTouched(prev => ({ ...prev, fullName: true }));
@@ -106,21 +103,15 @@ export function useSignupForm() {
   };
 
   return {
-    // 🧩 Values
     ...values,
-    // 🧩 Errors
     ...errors,
-    // 🧩 Touched flags
     touchedFullName: touched.fullName,
     touchedEmail: touched.email,
     touchedPassword: touched.password,
-    // 🧩 Handlers
     handleNameChange,
     handleEmailChange,
     handlePasswordChange,
-    // 🧩 Validation
     validateAll,
-    // 🧩 Allow parent to set errors (for inline server-side validation)
     setErrors,
   };
 }
