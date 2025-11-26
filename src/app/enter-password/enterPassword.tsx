@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
 import ErrorIcon from "@/components/icons/ErrorIcon";
 import NextIcon from "@/components/icons/NextIcon";
 import PasswordToggleOnIcon from "@/components/icons/PasswordToggleOnIcon";
@@ -54,6 +55,7 @@ export default function EnterPassword() {
       if (success) {
         sessionStorage.removeItem("login_identifier");
         if (token) localStorage.setItem("access_token", token);
+
         router.push("/");
       } else {
         setErrors({

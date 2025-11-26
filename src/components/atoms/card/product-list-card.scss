@@ -7,18 +7,7 @@
   color: inherit;
   position: relative;
   overflow: hidden;
-  .bg-sky-image {
-    background-image: image-set(
-      url("https://static.skyassets.com/contentstack/assets/blt143e20b03d72047e/blt1f0eca7d8bf31ee6/69036620d836276b9a811038/2025_Q4_Oct_phpSpotlight_desktop_Mobile_v1.png?format=webp&imageManager=true&impolicy=resize&width=600")
-        1x,
-      url("https://static.skyassets.com/contentstack/assets/blt143e20b03d72047e/blt1f0eca7d8bf31ee6/69036620d836276b9a811038/2025_Q4_Oct_phpSpotlight_desktop_Mobile_v1.png?format=webp&imageManager=true&impolicy=resize&width=900")
-        2x
-    );
-    background-position: center bottom;
-    background-size: cover;
-    inset: 0px;
-    position: absolute;
-  }
+
   .button-secondary {
     align-items: center;
     border: 2px solid rgb(0, 15, 245);

@@ -21,8 +21,17 @@ export const typeDefs = /* GraphQL */ `
     token: String
   }
 
+  type CookieCategory {
+    _id: ID!
+    key: String!
+    title: String!
+    description: String!
+    required: Boolean!
+  }
+
   type Query {
     me: User
+    cookieCategories: [CookieCategory!]!
   }
 
   type SendOtpResponse {

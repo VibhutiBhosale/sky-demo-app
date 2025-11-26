@@ -4,12 +4,8 @@ import "./heroBanner.scss";
 export default function HeroBanner() {
   return (
     <section className="relative w-full overflow-hidden md:mb-15 lg:mb-0">
-      <div className="mx-auto max-w-[1600px] lg:px-12 lg:pb-18">
-        {/* ---------- IMAGE ---------- */}
-
+      <div className="mx-auto max-w-[1600px] md:px-0 lg:px-12 lg:pb-18">
         <HeroResponsiveImage />
-
-        {/* ---------- TEXT BELOW (mobile/tablet) ---------- */}
         <div className="mt-6 block text-center lg:hidden">
           <h1 className="text-3xl font-semibold text-[#4a4a4a] sm:text-4xl">
             Unmissable Sky deals
@@ -27,7 +23,6 @@ export default function HeroBanner() {
           </div>
         </div>
 
-        {/* ---------- TEXT OVER IMAGE (desktop only) ---------- */}
         <div className="absolute inset-0 hidden items-center lg:flex">
           <div className="mx-auto w-full max-w-7xl px-12">
             <div className="max-w-md text-[#4a4a4a] lg:w-[32%] lg:max-w-[534px] lg:pl-[104px]">

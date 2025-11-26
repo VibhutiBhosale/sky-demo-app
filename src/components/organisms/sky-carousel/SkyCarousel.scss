@@ -1,0 +1,48 @@
+.sky-carousel {
+  width: 100%;
+  position: relative;
+  padding-bottom: 60px;
+}
+
+.sky-carousel__viewport {
+  overflow: hidden;
+}
+
+.sky-carousel__container {
+  display: flex;
+}
+
+.sky-carousel__slide {
+  flex: 0 0 47%; /* Like Sky.com */
+  min-width: 300px;
+  padding: 12px;
+  scroll-snap-align: center;
+}
+
+/* Ensures correct height */
+.sky-carousel__slide > div {
+  //width: 100%;
+  //aspect-ratio: 16 / 9;
+  //border-radius: 8px;
+  //overflow: hidden;
+}
+
+.sky-carousel__controls {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+.nav-btn {
+  background: white;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}

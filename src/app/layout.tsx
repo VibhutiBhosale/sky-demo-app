@@ -2,7 +2,6 @@
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { usePathname } from "next/navigation";
-
 import AuthHeader from "@/components/organisms/header/AuthHeader";
 import Header from "@/components/organisms/header/Header";
 import Footer from "@/components/organisms/footer/Footer";
@@ -55,7 +54,7 @@ export default function RootLayout({
       <link rel="shortcut icon" type="image/ico" href="https://id.sky.com/favicon.ico"></link>
       <body className={`antialiased`}>
         {isAuthPage ? <AuthHeader /> : <Header />}
-        <main className="main-content">
+        <main>
           {/* Main content goes here */}
           <ThemeProvider theme={theme}>{children}</ThemeProvider>
         </main>
