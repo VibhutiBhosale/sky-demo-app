@@ -102,7 +102,6 @@ export default function Home() {
       <ProductCard />
       <div className="relative mx-auto w-full max-w-[1248px] p-6">
         <Box sx={{ flexGrow: 1 }}>
-          {/* Setting up the Fluid Grid system */}
           <Grid container spacing={3}>
             {ProductsData.map((product, index) => (
               <Grid
