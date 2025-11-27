@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,101 +18,97 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-const COOKIE_CATEGORIES = [
-  {
-    key: "essential",
-    title: "Essential cookies",
-    description:
-      "These cookies are required for basic website functionality and cannot be disabled. They help keep the site secure and provide core features.",
-    required: true,
-  },
-  {
-    key: "analytics",
-    title: "Analytics Storage",
-    description:
-      "Analytics cookies help us understand how people use the site so we can improve it. They collect anonymous usage data.",
-    required: false,
-  },
-  {
-    key: "advertising",
-    title: "Personalised advertising and content",
-    description:
-      "These cookies are used to deliver personalised advertising and measure its performance.",
-    required: false,
-  },
-  {
-    key: "preferences",
-    title: "Store and/or access information on a device",
-    description:
-      "Used to remember your choices (language, region, accessibility) so you don't have to re-enter them every visit.",
-    required: false,
-  },
-];
+import { graphqlRequest } from "@/lib/apiClient";
+import { GET_COOKIE_CATEGORIES } from "@/graphql/queries/cookies";
 
+type CookieCategory = {
+  key: string;
+  title: string;
+  description: string;
+  required: boolean;
+};
 type ConsentState = Record<string, boolean>;
 
-//LocalStorage key used to store the user's consent.
-const Cookie_Key = "cookie_consent";
+const COOKIE_KEY = "cookie_consent";
 
 export default function CookieModal() {
   const [open, setOpen] = useState(false);
+  const [categories, setCategories] = useState<CookieCategory[]>([]);
   const [consent, setConsent] = useState<ConsentState>({});
   const [expanded, setExpanded] = useState<string | false>(false);
+  const [loading, setLoading] = useState(true);
 
-  // Initialize consent defaults from localStorage (or defaults)
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(Cookie_Key);
-      if (stored) {
-        setConsent(JSON.parse(stored));
-        // if stored, don't show modal
-        setOpen(false);
-        return;
-      }
-    } catch (err) {
-      // ignore parse error
-    }
+    async function load() {
+      try {
+        const data = await graphqlRequest<{ cookieCategories: CookieCategory[] }>({
+          query: GET_COOKIE_CATEGORIES,
+        });
 
-    // If user is logged in (or visited), show the modal.
-    const loggedIn = Boolean(sessionStorage.getItem("email"));
-    if (loggedIn) {
-      setConsent(
-        COOKIE_CATEGORIES.reduce((acc, c) => {
+        const list = data.cookieCategories || [];
+        setCategories(list);
+
+        // Check if cookie consent exists
+        const stored = localStorage.getItem(COOKIE_KEY);
+
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+
+            // Validate: stored keys must match DB keys
+            const valid = list.every(c => parsed.hasOwnProperty(c.key));
+
+            if (valid) {
+              setConsent(parsed);
+              setLoading(false);
+              return; // Consent exists → do NOT show modal
+            }
+          } catch {}
+        }
+
+        // No valid consent → show the modal
+        const defaults = list.reduce((acc: ConsentState, c: CookieCategory) => {
           acc[c.key] = c.required ? true : false;
           return acc;
-        }, {} as ConsentState)
-      );
-      setOpen(true);
+        }, {});
+
+        setConsent(defaults);
+        setOpen(true); // Always open when consent missing
+      } catch (err) {
+        console.error("Error fetching cookie categories:", err);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    load();
   }, []);
 
-  // write consent to localStorage
-  const saveConsent = (payload: ConsentState) => {
-    localStorage.setItem(Cookie_Key, JSON.stringify(payload));
-  };
+  const saveConsent = (payload: ConsentState) =>
+    localStorage.setItem(COOKIE_KEY, JSON.stringify(payload));
 
-  const handleToggle = (key: string) => {
-    if (COOKIE_CATEGORIES.find(c => c.key === key)?.required) return;
+  const handleToggle = (key: string, required: boolean) => {
+    if (required) return;
     setConsent(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleAcceptAll = () => {
-    const payload = COOKIE_CATEGORIES.reduce((acc, c) => {
+    const all = categories.reduce((acc: ConsentState, c: CookieCategory) => {
       acc[c.key] = true;
       return acc;
-    }, {} as ConsentState);
-    setConsent(payload);
-    saveConsent(payload);
+    }, {});
+    setConsent(all);
+    saveConsent(all);
     setOpen(false);
   };
 
   const handleEssentialOnly = () => {
-    const payload = COOKIE_CATEGORIES.reduce((acc, c) => {
-      acc[c.key] = c.required ?? false;
+    const onlyEssential = categories.reduce((acc: ConsentState, c: CookieCategory) => {
+      acc[c.key] = c.required ? true : false;
       return acc;
-    }, {} as ConsentState);
-    setConsent(payload);
-    saveConsent(payload);
+    }, {});
+    setConsent(onlyEssential);
+    saveConsent(onlyEssential);
     setOpen(false);
   };
 
@@ -121,33 +117,19 @@ export default function CookieModal() {
     setOpen(false);
   };
 
-  const onClose = () => {
-    setOpen(false);
-  };
+  if (loading || categories.length === 0) return null;
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="md"
-      aria-labelledby="cookie-dialog-title"
-      disableEnforceFocus
-    >
-      <DialogTitle id="cookie-dialog-title" sx={{ fontWeight: 700 }}>
-        Your cookie options
-      </DialogTitle>
+    <Dialog open={open} fullWidth maxWidth="md" onClose={() => setOpen(false)}>
+      <DialogTitle sx={{ fontWeight: 700 }}>Your cookie options</DialogTitle>
 
       <DialogContent>
         <Typography variant="body2" sx={{ mb: 2 }}>
-          Sky and its trusted partners use cookies and similar tech to store cookies and access
-          personal data on your device. You can choose which ones you’re comfortable with.
+          Sky and its trusted partners use cookies and similar technologies.
         </Typography>
 
-        {/* Accordion list */}
         <Box>
-          {COOKIE_CATEGORIES.map(cat => {
-            const isRequired = !!cat.required;
+          {categories.map(cat => {
             const checked = Boolean(consent[cat.key]);
 
             return (
@@ -157,16 +139,12 @@ export default function CookieModal() {
                 onChange={(_, ex) => setExpanded(ex ? cat.key : false)}
                 sx={{ mb: 1, boxShadow: "none", border: "1px solid #eee" }}
               >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls={`${cat.key}-content`}
-                  id={`${cat.key}-header`}
-                >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                   <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <Typography sx={{ fontWeight: 700 }}>{cat.title}</Typography>
 
                     <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 2 }}>
-                      {isRequired ? (
+                      {cat.required ? (
                         <Typography variant="caption" color="text.secondary">
                           Required
                         </Typography>
@@ -177,11 +155,8 @@ export default function CookieModal() {
                               checked={checked}
                               onClick={e => {
                                 e.stopPropagation();
-                                handleToggle(cat.key);
+                                handleToggle(cat.key, cat.required);
                               }}
-                              onFocus={e => e.stopPropagation()}
-                              disabled={isRequired}
-                              inputProps={{ "aria-label": `${cat.title} toggle` }}
                             />
                           }
                           label=""
@@ -198,28 +173,24 @@ export default function CookieModal() {
             );
           })}
         </Box>
-
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
-          Our partners use cookies, IDs and other tech. You can change these anytime from privacy
-          options in the footer.
-        </Typography>
       </DialogContent>
 
       <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 3 }}>
         <Box>
-          <Button onClick={handleEssentialOnly} variant="outlined" sx={{ mr: 2 }}>
+          <Button variant="outlined" onClick={handleEssentialOnly}>
             Essential cookies only
           </Button>
 
-          <Button onClick={handleAcceptAll} variant="contained" color="primary">
+          <Button variant="contained" sx={{ ml: 2 }} onClick={handleAcceptAll}>
             Accept all
           </Button>
         </Box>
 
         <Box>
-          <Button onClick={handleSave} variant="text" sx={{ mr: 1 }}>
+          <Button variant="text" onClick={handleSave}>
             Save my choices
           </Button>
+
           <Link href="/privacy" underline="hover" sx={{ ml: 1 }}>
             View options
           </Link>

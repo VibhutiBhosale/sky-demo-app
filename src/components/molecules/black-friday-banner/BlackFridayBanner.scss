@@ -1,0 +1,49 @@
+.primary-button {
+  -webkit-box-align: center;
+  align-items: center;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: bold;
+  -webkit-box-pack: center;
+  justify-content: center;
+  line-height: 24px;
+  outline: none;
+  padding: 8px 16px;
+  position: relative;
+  text-align: center;
+  transition: 200ms ease-out;
+  background-color: rgb(0, 15, 245);
+  color: rgb(255, 255, 255);
+  background-image: linear-gradient(
+    -1deg,
+    transparent 49%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(225, 225, 225, 0)
+  );
+  display: block;
+}
+
+.secondary-button {
+  -webkit-box-align: center;
+  align-items: center;
+  border: 2px solid rgb(0, 15, 245);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: bold;
+  -webkit-box-pack: center;
+  justify-content: center;
+  line-height: 24px;
+  outline: none;
+  padding: 8px 16px;
+  position: relative;
+  text-align: center;
+  transition: 200ms ease-out;
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 15, 245);
+  display: block;
+}

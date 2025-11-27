@@ -81,7 +81,7 @@
 }
 html,
 body {
-  font-family: "Sky Text", sans-serif;
+  font-family: "Sky Text", sans-serif !important;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;

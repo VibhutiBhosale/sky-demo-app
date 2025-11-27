@@ -1,22 +1,28 @@
-import User from "@/models/User";
-import Otp from "@/models/Otp";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import dbConnect from "@/lib/mongodb";
 import { GraphQLError } from "graphql";
+
+import User from "@/models/User";
+import Otp from "@/models/Otp";
+import dbConnect from "@/lib/mongodb";
 import {
   createAccessToken,
   createRefreshToken,
   getRefreshCookie,
   clearRefreshCookie,
-} from "../lib/auth";
+} from "@/lib/auth";
 import { UpdateSignupEmailArgs } from "@/types/types";
+import CookieCategory from "@/models/CookieCategory";
 
 export const resolvers = {
   Query: {
     me: async (_parent: unknown, _args: Record<string, never>, context: GraphQLContext) => {
       if (!context.userId) return null;
       return await User.findById(context.userId);
+    },
+    cookieCategories: async () => {
+      await dbConnect();
+      return await CookieCategory.find().lean();
     },
   },
 

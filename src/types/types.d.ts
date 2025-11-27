@@ -13,3 +13,13 @@ export interface NavItem {
   submenu?: string[];
   position: "left" | "right";
 }
+
+export type ProductDataProps = {
+  cardHeading: string;
+  productHeading: string;
+  productDesciption: string;
+  productImageWidth600: string;
+  productImageWidth900: string;
+  primaryButton: string;
+  secondaryButton: string;
+};
