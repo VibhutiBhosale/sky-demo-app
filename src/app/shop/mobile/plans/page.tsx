@@ -5,7 +5,7 @@ import Container from "@mui/material/Container";
 import Heading from "@/components/atoms/heading/heading";
 import AwardNetworkCard from "@/components/atoms/award-winning-card/AwardWinningCard";
 import ReasonsToBuy from "@/components/atoms/reasons-to-buy/ReasonsToBuy";
-import { awardWinningCardData, reasonsToBuyData } from "@/constants";
+import { awardWinningCardData, reasonsToBuyData, labels } from "@/constants";
 
 export default function PlansPage() {
   return (
@@ -27,10 +27,7 @@ export default function PlansPage() {
           maxWidth: "1248px",
         }}
       >
-        <AwardNetwork
-          heading="Join our award winning network"
-          link="Read more about our data plans"
-        >
+        <AwardNetwork heading={labels.awardNetwork.heading} link={labels.awardNetwork.link}>
           <AwardNetworkCard awardWinningCardData={awardWinningCardData} />
         </AwardNetwork>
       </Container>
@@ -42,10 +39,10 @@ export default function PlansPage() {
           }}
         >
           <div className="mx-auto pt-10 text-center">
-            <Heading heading="SIM only data plans" />
+            <Heading heading={labels.reasonsToBuy.simOnlyText} />
           </div>
           <PlanCard />
-          <AwardNetwork heading="Why Sky Mobile?" link="Read more about Sky Mobile">
+          <AwardNetwork heading={labels.reasonsToBuy.heading} link={labels.reasonsToBuy.link}>
             <ReasonsToBuy reasonToBuyData={reasonsToBuyData} />
           </AwardNetwork>
         </Container>

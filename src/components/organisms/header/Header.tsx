@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import {
   Toolbar,
   IconButton,
-  Menu,
-  MenuItem,
   Drawer,
   List,
   ListItem,
@@ -32,7 +30,6 @@ import Image from "next/image";
 import "./header.scss";
 
 export default function Header() {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuOpenKey, setMenuOpenKey] = useState<string>("");
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [openMobileKeys, setOpenMobileKeys] = useState<Record<string, boolean>>({});
@@ -43,15 +40,12 @@ export default function Header() {
   const handleArrowClick = (event: React.MouseEvent<HTMLElement>, key: string) => {
     if (menuOpenKey === key) {
       setMenuOpenKey("");
-      setAnchorEl(null);
       return;
     }
     setMenuOpenKey(key);
-    setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
     setMenuOpenKey("");
   };
 
@@ -156,26 +150,14 @@ export default function Header() {
         </header>
       </div>
 
-      {/* DROPDOWN MENU */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        disableScrollLock
-        disableAutoFocusItem
-        disableRestoreFocus
-        slotProps={{
-          paper: {
-            className: activeMenu?.key === "Help" ? "flex justify-end" : "",
-          },
-        }}
-      >
-        {activeMenu?.submenu?.map(submenu => (
-          <MenuItem key={submenu} onClick={handleMenuClose}>
-            {submenu}
-          </MenuItem>
+      {/* SIMPLE CUSTOM SUBMENU (NO MUI MENU) */}
+      <div className={`sky-submenu ${menuOpenKey ? "open" : ""}`}>
+        {activeMenu?.submenu?.map(item => (
+          <a key={item.label} href={item.url} className="submenu-item" onClick={handleMenuClose}>
+            {item.label}
+          </a>
         ))}
-      </Menu>
+      </div>
 
       {/* MOBILE HEADER */}
       <div className="block md:hidden">
@@ -258,10 +240,10 @@ export default function Header() {
                           <ListItem key={s} disablePadding>
                             <ListItemButton
                               component="a"
-                              href="#"
+                              href={typeof s === "string" ? "#" : s.url}
                               onClick={() => setDrawerOpen(false)}
                             >
-                              <ListItemText primary={s} />
+                              {typeof s === "string" ? s : s.label}
                             </ListItemButton>
                           </ListItem>
                         ))}

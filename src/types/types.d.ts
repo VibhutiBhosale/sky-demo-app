@@ -7,11 +7,16 @@ export declare global {
   var tempOtps: { [email: string]: string } | undefined;
 }
 
+export interface SubmenuItem {
+  label: string;
+  url: string;
+}
+
 export interface NavItem {
   key: string;
-  url?: string;
-  submenu?: string[];
+  url: string;
   position: "left" | "right";
+  submenu?: SubmenuItem[];
 }
 
 export type ProductDataProps = {

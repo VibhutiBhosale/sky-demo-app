@@ -1,4 +1,6 @@
 import HeroResponsiveImage from "@/components/atoms/hero-responsive-image/HeroResponsiveImage";
+import { labels } from "@/constants";
+
 import "./heroBanner.scss";
 
 export default function HeroBanner() {
@@ -8,17 +10,16 @@ export default function HeroBanner() {
         <HeroResponsiveImage />
         <div className="mt-6 block text-center lg:hidden">
           <h1 className="text-3xl font-semibold text-[#4a4a4a] sm:text-4xl">
-            Unmissable Sky deals
+            {labels.heroBanner.heading}
           </h1>
 
           <p className="mx-auto mt-4 max-w-md text-lg text-[#4a4a4a]">
-            From brilliant entertainment to super speedy broadband and great-value mobile — explore
-            our best ever Black Friday.
+            {labels.heroBanner.subHeading}
           </p>
 
           <div className="mt-6">
             <button className="see-all-deals-btn">
-              <span>See all deals</span>
+              <span>{labels.heroBanner.seeDeals}</span>
             </button>
           </div>
         </div>
@@ -26,14 +27,13 @@ export default function HeroBanner() {
         <div className="absolute inset-0 hidden items-center lg:flex">
           <div className="mx-auto w-full max-w-7xl px-12">
             <div className="max-w-md text-[#4a4a4a] lg:w-[32%] lg:max-w-[534px] lg:pl-[104px]">
-              <h1 className="text-5xl leading-tight font-semibold">Unmissable Sky deals</h1>
+              <h1 className="text-5xl leading-tight font-semibold">{labels.heroBanner.heading}</h1>
 
               <div className="mt-4 max-w-[398px] text-lg">
-                From brilliant entertainment to super speedy broadband and great-value mobile —
-                explore our best ever Black Friday.
+                {labels.heroBanner.desc}
                 <div className="pt-6">
                   <button className="see-all-deals-btn">
-                    <span>See all deals</span>
+                    <span>{labels.heroBanner.seeDeals}</span>
                   </button>
                 </div>
               </div>

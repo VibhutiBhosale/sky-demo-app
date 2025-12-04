@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { labels } from "@/constants";
+
 import "./BlackFridayBanner.scss";
 
 export default function BlackFridayBanner() {
@@ -9,25 +11,22 @@ export default function BlackFridayBanner() {
       {/* LEFT TEXT CONTENT */}
       <div>
         <div className="py-3 text-[2rem] leading-[2.5rem] md:text-[3rem] md:leading-[4rem]">
-          Epic data plans at our <br />
-          <span>LOWEST PRICE ever</span>
+          {labels.blackFridayBanner.desc} <br />
+          <span>{labels.blackFridayBanner.desc}1</span>
         </div>
 
-        <p className="text-lg text-gray-600">
-          Enjoy 10GB of data for just £8 a month, or go big with our 40GB data plan for just £10 a
-          month.
-        </p>
+        <p className="text-lg text-gray-600">{labels.blackFridayBanner.desc2}</p>
 
         {/* BUTTONS */}
         <div className="mt-8 mb-1 flex flex-wrap gap-4">
-          <button className="primary-button">40GB for £10 a month</button>
+          <button className="primary-button">{labels.blackFridayBanner.primaryButton}</button>
 
-          <button className="secondary-button">10GB for £8 a month</button>
+          <button className="secondary-button">{labels.blackFridayBanner.secondaryButton}</button>
         </div>
 
         {/* TERMS */}
         <a href="#" className="text-sm leading-[1.5rem] font-bold text-[rgb(0,15,245)]">
-          Terms & conditions
+          {labels.blackFridayBanner.termsLink}
         </a>
       </div>
 

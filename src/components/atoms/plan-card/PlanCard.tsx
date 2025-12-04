@@ -3,48 +3,8 @@ import Image from "next/image";
 import { useState } from "react";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-const simPlanCardData = [
-  {
-    data: "100 MB",
-    price: "£5",
-    bannerData: "",
-  },
-  {
-    data: "1 GB",
-    price: "£5",
-    bannerData: "Now £2 a month",
-  },
-  {
-    data: "5 GB",
-    price: "£12",
-    bannerData: "Now £6 a month",
-  },
-  {
-    data: "10 GB",
-    price: "£14",
-    bannerData: "Now £8 a month - our LOWEST EVER price",
-  },
-  {
-    data: "40 GB",
-    price: "£18",
-    bannerData: "Now £10 a month - save £96",
-  },
-  {
-    data: "50 GB",
-    price: "£20",
-    bannerData: "",
-  },
-  {
-    data: "60 GB",
-    price: "£22",
-    bannerData: "",
-  },
-  {
-    data: "Unlimited",
-    price: "£29",
-    bannerData: "Now £20 a month",
-  },
-];
+import { simPlanCardData, labels } from "@/constants";
+
 export default function PlanCard() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [simType, setSimType] = useState("esim");
@@ -62,7 +22,9 @@ export default function PlanCard() {
                     <div className="text-[32px] leading-[40px] font-bold text-[#e6007e]">
                       {item.data}
                     </div>
-                    <div className="text-[16px] leading-[24px] text-gray-600">data plan</div>
+                    <div className="text-[16px] leading-[24px] text-gray-600">
+                      {labels.simCardPlan.dataPlan}
+                    </div>
                   </div>
 
                   <div className="text-right">
@@ -71,7 +33,7 @@ export default function PlanCard() {
                     </div>
                     <div className="text-[16px] leading-[20px] text-gray-500">
                       a<br />
-                      month
+                      {labels.simCardPlan.month}
                     </div>
                   </div>
                 </div>
@@ -99,7 +61,9 @@ export default function PlanCard() {
                   onClick={() => setOpenIndex(openIndex === index ? null : index)}
                   className="flex w-full cursor-pointer items-center justify-between rounded border-0 bg-white px-6 py-6 text-left"
                 >
-                  <span className="text-lg font-medium text-[#0028ff]">Choose a SIM type</span>
+                  <span className="text-lg font-medium text-[#0028ff]">
+                    {labels.simCardPlan.heading}
+                  </span>
 
                   <svg
                     width="20"
@@ -131,7 +95,7 @@ export default function PlanCard() {
                         )}
                       </span>
 
-                      <span className="text-lg text-gray-800">eSIM*</span>
+                      <span className="text-lg text-gray-800">{labels.simCardPlan.eSIM}</span>
                     </label>
 
                     {/* PLASTIC SIM */}
@@ -147,17 +111,14 @@ export default function PlanCard() {
                         )}
                       </span>
 
-                      <span className="text-lg text-gray-800">Plastic SIM card</span>
+                      <span className="text-lg text-gray-800">{labels.simCardPlan.simType}</span>
                     </label>
 
                     <p className="mt-2 text-[15px] leading-[22px] text-gray-600">
-                      *eSIM is built into your phone so there is no need for a plastic SIM. You’ll
-                      be set up in seconds.
+                      {labels.simCardPlan.desc}
                     </p>
 
-                    <button className="mt-6 w-full rounded-md bg-gradient-to-r from-[#0047ff] to-[#001aff] py-3.5 text-[20px] font-semibold text-white transition hover:opacity-90">
-                      Add {item.data} plan to basket
-                    </button>
+                    <button className="primary-button">Add {item.data} plan to basket</button>
                   </div>
                 )}
               </div>

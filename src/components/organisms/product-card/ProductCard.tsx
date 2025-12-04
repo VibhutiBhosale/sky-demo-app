@@ -1,4 +1,6 @@
 import "./ProductCard.scss";
+import { labels } from "@/constants";
+
 export default function ProductCard() {
   return (
     <section className="product-card-box px-6">
@@ -9,20 +11,19 @@ export default function ProductCard() {
         {/* 🔴 CONTENT ON TOP */}
         <div className="relative z-10 mt-0 flex h-full max-w-[500px] flex-col items-center justify-center px-6 py-10 text-center sm:px-10 md:mt-[6%] md:max-w-[340px] md:px-5 md:py-0 lg:mt-[12%] lg:max-w-[500px] lg:px-10">
           <h3 className="text-[#4a4a4a]">
-            <div className="mb-1 font-bold">Sky Broadband</div>
+            <div className="mb-1 font-bold">{labels.productCard.heading}</div>
 
-            <div className="text-[1.75rem] leading-[2.25rem]">Super Speeds. Super Savings.</div>
+            <div className="text-[1.75rem] leading-[2.25rem]">{labels.productCard.subHeading}</div>
           </h3>
 
-          <p className="mt-4 text-lg leading-relaxed text-[#4a4a4a]">
-            Get Full Fibre 150 for just £25 a month — powerful, reliable broadband that keeps
-            everyone connected.
-          </p>
+          <p className="mt-4 text-lg leading-relaxed text-[#4a4a4a]">{labels.productCard.desc}</p>
 
           {/* Buttons */}
           <div className="mt-6 flex flex-wrap gap-4">
-            <a className="button-secondary whitespace-nowrap">Learn more</a>
-            <a className="button-primary whitespace-nowrap">Buy now</a>
+            <a className="button-secondary whitespace-nowrap">
+              {labels.productCard.secondaryButton}
+            </a>
+            <a className="button-primary whitespace-nowrap">{labels.productCard.primaryButton}</a>
           </div>
         </div>
       </div>

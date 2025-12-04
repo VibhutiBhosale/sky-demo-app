@@ -65,32 +65,39 @@ header {
     }
   }
 }
-.MuiPaper-root.MuiPopover-paper.MuiMenu-paper {
-  width: 100vw;
-  max-width: 100vw;
-  border-radius: 0;
-  left: 0 !important;
-  transform: none !important;
-  box-shadow: none;
+
+.sky-submenu {
+  width: 100%;
+  background: #fff;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  top: 48px !important;
-  ul {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  z-index: 250;
+
+  display: none;
+
+  padding: 0 1.5rem;
+  height: 48px;
+  display: none;
+
+  &.open {
     display: flex;
-    flex-flow: row nowrap;
-    justify-content: flex-start;
-    align-items: stretch;
-    gap: 2rem;
+  }
+
+  .submenu-item {
+    display: flex;
+    align-items: center;
     height: 48px;
-    overflow: auto hidden;
-    padding: 0 1.5rem 0 1.5rem;
-    position: relative;
-    z-index: 2;
-    li {
-      padding: 0;
-      font-size: 1rem;
-      line-height: 1.5rem;
-      color: #4a4a4a;
-      font-family: "Sky Text", sans-serif;
+    padding: 0 1rem;
+    font-size: 1rem;
+    color: #4a4a4a;
+    font-family: "Sky Text", sans-serif;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+      text-decoration: underline;
     }
   }
 }

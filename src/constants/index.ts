@@ -6,3 +6,4 @@ export * from "./footerLinks";
 export * from "./headerLinksData";
 export * from "./awardWinningCardData";
 export * from "./reasonsToBuyData";
+export * from "./simPlanCardData";
